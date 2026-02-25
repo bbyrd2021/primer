@@ -1,0 +1,1150 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Primer — MVP Engineering Spec</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;1,400&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --ink: #110d0d;
+  --maroon: #7a1525;
+  --maroon-br: #9b2535;
+  --cream: #f6f2eb;
+  --surface: #f4f3f0;
+  --white: #ffffff;
+  --muted: #8a8078;
+  --rule: rgba(0,0,0,0.08);
+  --code-bg: #1a1414;
+  --code-text: #e8e0d5;
+  --green: #2d7a4f;
+  --amber: #b07818;
+}
+
+body {
+  font-family: 'DM Sans', sans-serif;
+  background: var(--white);
+  color: var(--ink);
+  -webkit-font-smoothing: antialiased;
+  line-height: 1.6;
+}
+
+/* Layout */
+.sidebar {
+  position: fixed;
+  top: 0; left: 0;
+  width: 240px;
+  height: 100vh;
+  background: var(--ink);
+  padding: 32px 24px;
+  overflow-y: auto;
+  z-index: 100;
+}
+
+.main {
+  margin-left: 240px;
+  padding: 64px 72px;
+  max-width: 960px;
+}
+
+/* Sidebar */
+.sidebar-logo {
+  font-family: 'Playfair Display', serif;
+  font-weight: 700;
+  font-size: 20px;
+  color: var(--cream);
+  letter-spacing: -0.01em;
+  margin-bottom: 4px;
+}
+.sidebar-logo .ri { font-style: italic; color: var(--maroon-br); }
+.sidebar-sub {
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: rgba(200,192,180,0.4);
+  margin-bottom: 36px;
+}
+
+.nav-section {
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: rgba(200,192,180,0.3);
+  margin: 24px 0 8px;
+}
+
+.nav-item {
+  display: block;
+  font-size: 13px;
+  font-weight: 400;
+  color: rgba(200,192,180,0.6);
+  text-decoration: none;
+  padding: 5px 0;
+  transition: color 0.15s;
+  border-left: 2px solid transparent;
+  padding-left: 10px;
+  margin-left: -10px;
+}
+.nav-item:hover { color: var(--cream); }
+.nav-item.active { color: var(--cream); border-left-color: var(--maroon-br); }
+
+/* Status pill */
+.status-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(45,122,79,0.15);
+  border: 1px solid rgba(45,122,79,0.3);
+  border-radius: 4px;
+  padding: 4px 10px;
+  margin-top: 32px;
+}
+.status-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--green); animation: pulse 2s ease infinite; }
+@keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.4} }
+.status-text { font-size: 11px; font-weight: 500; color: var(--green); letter-spacing: 0.06em; }
+
+/* Content */
+.section { margin-bottom: 80px; }
+
+.section-label {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--maroon);
+  margin-bottom: 12px;
+}
+
+h1 {
+  font-family: 'Playfair Display', serif;
+  font-weight: 700;
+  font-size: 48px;
+  letter-spacing: -0.03em;
+  line-height: 1.0;
+  color: var(--ink);
+  margin-bottom: 20px;
+}
+h1 .ri { font-style: italic; color: var(--maroon); }
+
+h2 {
+  font-family: 'Playfair Display', serif;
+  font-weight: 700;
+  font-size: 28px;
+  letter-spacing: -0.02em;
+  color: var(--ink);
+  margin: 48px 0 16px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--rule);
+}
+
+h3 {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--ink);
+  margin: 28px 0 10px;
+  letter-spacing: -0.01em;
+}
+
+p {
+  font-size: 15px;
+  font-weight: 300;
+  color: #3a3530;
+  line-height: 1.75;
+  margin-bottom: 14px;
+}
+
+strong { font-weight: 600; color: var(--ink); }
+
+/* Code blocks */
+pre {
+  background: var(--code-bg);
+  border-radius: 10px;
+  padding: 24px 28px;
+  margin: 16px 0 24px;
+  overflow-x: auto;
+  position: relative;
+}
+
+.code-label {
+  position: absolute;
+  top: 12px; right: 16px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  font-weight: 500;
+  color: rgba(232,224,213,0.25);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+code {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 13px;
+  line-height: 1.7;
+  color: var(--code-text);
+}
+
+/* Inline code */
+p code, li code {
+  background: var(--surface);
+  color: var(--maroon);
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-size: 12px;
+}
+
+/* Comments in code */
+.c { color: rgba(232,224,213,0.3); }
+.kw { color: #c49070; }
+.st { color: #90b870; }
+.fn { color: #7090d0; }
+.cm { color: #d07090; }
+
+/* Day cards */
+.day-card {
+  border: 1px solid var(--rule);
+  border-radius: 12px;
+  padding: 28px 32px;
+  margin: 16px 0;
+  background: var(--white);
+  position: relative;
+  overflow: hidden;
+}
+.day-card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0;
+  width: 3px; height: 100%;
+  background: var(--maroon);
+}
+.day-card.new::before { background: var(--green); }
+.day-card.updated::before { background: var(--amber); }
+
+.day-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 10px;
+}
+.day-num {
+  font-family: 'Playfair Display', serif;
+  font-style: italic;
+  font-size: 13px;
+  color: var(--maroon);
+  font-weight: 400;
+}
+.day-title {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--ink);
+  letter-spacing: -0.01em;
+}
+.day-badge {
+  margin-left: auto;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  padding: 3px 8px;
+  border-radius: 4px;
+}
+.badge-new { background: rgba(45,122,79,0.1); color: var(--green); }
+.badge-updated { background: rgba(176,120,24,0.1); color: var(--amber); }
+.badge-same { background: rgba(0,0,0,0.05); color: var(--muted); }
+
+.day-body { font-size: 14px; font-weight: 300; color: var(--muted); line-height: 1.65; }
+
+/* Feature grid */
+.feat-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin: 20px 0;
+}
+.feat-box {
+  background: var(--surface);
+  border-radius: 10px;
+  padding: 20px 22px;
+  border: 1px solid var(--rule);
+}
+.feat-box-t { font-size: 13px; font-weight: 600; color: var(--ink); margin-bottom: 6px; }
+.feat-box-b { font-size: 12px; font-weight: 300; color: var(--muted); line-height: 1.55; }
+
+/* File tree */
+.filetree {
+  background: var(--code-bg);
+  border-radius: 10px;
+  padding: 24px 28px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 13px;
+  line-height: 1.9;
+  color: var(--code-text);
+  margin: 16px 0;
+}
+.ft-dir { color: #7090d0; }
+.ft-file { color: var(--code-text); }
+.ft-new { color: #90b870; }
+.ft-comment { color: rgba(232,224,213,0.3); }
+
+/* Schema table */
+.schema-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 16px 0;
+  font-size: 13px;
+}
+.schema-table th {
+  background: var(--ink);
+  color: var(--cream);
+  padding: 10px 16px;
+  text-align: left;
+  font-weight: 500;
+  font-size: 11px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+.schema-table td {
+  padding: 10px 16px;
+  border-bottom: 1px solid var(--rule);
+  vertical-align: top;
+}
+.schema-table tr:last-child td { border-bottom: none; }
+.schema-table tr:nth-child(even) td { background: var(--surface); }
+
+.tag { display: inline-block; background: rgba(122,21,37,0.08); color: var(--maroon); font-size: 11px; font-weight: 500; padding: 2px 7px; border-radius: 4px; font-family: 'JetBrains Mono', monospace; }
+
+/* Pipeline diagram */
+.pipeline {
+  display: flex;
+  align-items: center;
+  gap: 0;
+  margin: 20px 0;
+  flex-wrap: wrap;
+}
+.pipe-step {
+  background: var(--surface);
+  border: 1px solid var(--rule);
+  border-radius: 8px;
+  padding: 12px 16px;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--ink);
+  white-space: nowrap;
+}
+.pipe-step.new { background: rgba(45,122,79,0.08); border-color: rgba(45,122,79,0.2); color: var(--green); }
+.pipe-arrow { padding: 0 8px; color: var(--muted); font-size: 16px; }
+
+/* Callout */
+.callout {
+  border-left: 3px solid var(--maroon);
+  background: rgba(122,21,37,0.04);
+  border-radius: 0 8px 8px 0;
+  padding: 16px 20px;
+  margin: 16px 0;
+  font-size: 14px;
+  font-weight: 300;
+  color: var(--ink);
+  line-height: 1.65;
+}
+.callout strong { color: var(--maroon); }
+.callout.green { border-left-color: var(--green); background: rgba(45,122,79,0.04); }
+.callout.green strong { color: var(--green); }
+
+/* Checklist */
+.checklist { list-style: none; margin: 12px 0; }
+.checklist li {
+  font-size: 14px;
+  font-weight: 300;
+  color: #3a3530;
+  padding: 5px 0;
+  padding-left: 24px;
+  position: relative;
+}
+.checklist li::before {
+  content: '□';
+  position: absolute;
+  left: 0;
+  color: var(--maroon);
+  font-size: 14px;
+}
+
+@media print {
+  .sidebar { display: none; }
+  .main { margin-left: 0; }
+}
+
+.spacer-xl { height: 80px; }
+</style>
+</head>
+<body>
+
+<!-- SIDEBAR -->
+<nav class="sidebar">
+  <div class="sidebar-logo">P<span class="ri">ri</span>mer</div>
+  <div class="sidebar-sub">MVP Engineering Spec</div>
+
+  <div class="nav-section">Overview</div>
+  <a href="#core-loop" class="nav-item">Core Loop</a>
+  <a href="#stack" class="nav-item">Stack</a>
+  <a href="#file-structure" class="nav-item">File Structure</a>
+
+  <div class="nav-section">Features</div>
+  <a href="#ingestion" class="nav-item">PDF Ingestion</a>
+  <a href="#extraction" class="nav-item active">Paper Cards ✦ New</a>
+  <a href="#embeddings" class="nav-item">Embeddings + RAG</a>
+  <a href="#synthesis" class="nav-item">Brief Synthesis</a>
+  <a href="#ui" class="nav-item">Frontend UI</a>
+
+  <div class="nav-section">Build Plan</div>
+  <a href="#day1" class="nav-item">Day 1 — Ingestion</a>
+  <a href="#day2" class="nav-item">Day 2 — Cards ✦</a>
+  <a href="#day3" class="nav-item">Day 3 — Embeddings</a>
+  <a href="#day4" class="nav-item">Day 4 — Synthesis</a>
+  <a href="#day5" class="nav-item">Day 5 — UI + Deploy</a>
+
+  <div class="nav-section">Deploy</div>
+  <a href="#deploy" class="nav-item">Railway Setup</a>
+  <a href="#test" class="nav-item">Test Protocol</a>
+
+  <div class="status-pill">
+    <div class="status-dot"></div>
+    <span class="status-text">In Development</span>
+  </div>
+</nav>
+
+
+<!-- MAIN CONTENT -->
+<main class="main">
+
+  <!-- HERO -->
+  <div class="section" id="top">
+    <div class="section-label">Engineering Specification · v2.0</div>
+    <h1>P<span class="ri">ri</span>mer MVP</h1>
+    <p>Full build plan for a working prototype in 5 days. This version adds the <strong>Paper Organizer</strong> — structured per-paper extraction that turns uploaded PDFs into a searchable card library, alongside the RAG synthesis brief.</p>
+
+    <div class="callout green">
+      <strong>What changed from v1:</strong> We added a second core feature — structured paper card extraction. Users get both a scannable table of every paper (methodology, results, your fields from the spreadsheet) AND the narrative synthesis brief. Two outputs, one pipeline, dramatically higher perceived value.
+    </div>
+  </div>
+
+
+  <!-- CORE LOOP -->
+  <div class="section" id="core-loop">
+    <h2>Updated Core Loop</h2>
+    <p>Every PDF goes through two pipelines in parallel after upload:</p>
+
+    <h3>Pipeline A — Paper Cards (new)</h3>
+    <div class="pipeline">
+      <div class="pipe-step">Upload PDF</div>
+      <div class="pipe-arrow">→</div>
+      <div class="pipe-step">Extract full text</div>
+      <div class="pipe-arrow">→</div>
+      <div class="pipe-step new">Claude structured extraction</div>
+      <div class="pipe-arrow">→</div>
+      <div class="pipe-step new">Paper card JSON</div>
+      <div class="pipe-arrow">→</div>
+      <div class="pipe-step new">Organizer table UI</div>
+    </div>
+
+    <h3>Pipeline B — Research Brief (existing)</h3>
+    <div class="pipeline">
+      <div class="pipe-step">Chunks indexed</div>
+      <div class="pipe-arrow">→</div>
+      <div class="pipe-step">ChromaDB embeddings</div>
+      <div class="pipe-arrow">→</div>
+      <div class="pipe-step">RAG retrieval</div>
+      <div class="pipe-arrow">→</div>
+      <div class="pipe-step">Claude synthesis</div>
+      <div class="pipe-arrow">→</div>
+      <div class="pipe-step">Grounded brief</div>
+    </div>
+
+    <p>Both pipelines run off the same upload. The user gets their paper library populated immediately (Pipeline A is fast — one Claude call per paper), then generates the synthesis brief when ready (Pipeline B).</p>
+  </div>
+
+
+  <!-- STACK -->
+  <div class="section" id="stack">
+    <h2>Stack</h2>
+    <div class="feat-grid">
+      <div class="feat-box">
+        <div class="feat-box-t">Backend</div>
+        <div class="feat-box-b">FastAPI + Python. Async by default, excellent file handling, minimal boilerplate.</div>
+      </div>
+      <div class="feat-box">
+        <div class="feat-box-t">PDF Parsing</div>
+        <div class="feat-box-b">PyMuPDF (fitz). Fastest option, handles messy academic PDFs, preserves page metadata.</div>
+      </div>
+      <div class="feat-box">
+        <div class="feat-box-t">Embeddings + Vector Store</div>
+        <div class="feat-box-b">ChromaDB (local persistent) + sentence-transformers all-MiniLM-L6-v2. Zero infra, free, production-upgradeable.</div>
+      </div>
+      <div class="feat-box">
+        <div class="feat-box-t">AI</div>
+        <div class="feat-box-b">Claude API (claude-sonnet-4-5) for both structured extraction and RAG synthesis. Two different prompts, same client.</div>
+      </div>
+      <div class="feat-box">
+        <div class="feat-box-t">Frontend</div>
+        <div class="feat-box-b">Vanilla HTML/JS served by FastAPI. No build step. Ship in 5 days, style with Primer design system later.</div>
+      </div>
+      <div class="feat-box">
+        <div class="feat-box-t">Deploy</div>
+        <div class="feat-box-b">Railway. One command, FastAPI native, free tier covers MVP traffic.</div>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- FILE STRUCTURE -->
+  <div class="section" id="file-structure">
+    <h2>File Structure</h2>
+    <pre class="filetree"><span class="ft-dir">primer/</span>
+├── <span class="ft-file">main.py</span>                  <span class="ft-comment"># FastAPI app + all routes</span>
+├── <span class="ft-dir">core/</span>
+│   ├── <span class="ft-file">ingest.py</span>            <span class="ft-comment"># PDF parsing + chunking</span>
+│   ├── <span class="ft-new">extract.py</span>           <span class="ft-comment"># ✦ NEW: structured paper card extraction</span>
+│   ├── <span class="ft-file">embeddings.py</span>        <span class="ft-comment"># ChromaDB + semantic search</span>
+│   ├── <span class="ft-file">synthesize.py</span>        <span class="ft-comment"># RAG brief generation</span>
+│   └── <span class="ft-new">prompts.py</span>           <span class="ft-comment"># ✦ UPDATED: extraction + synthesis prompts</span>
+├── <span class="ft-dir">static/</span>
+│   ├── <span class="ft-new">index.html</span>           <span class="ft-comment"># ✦ UPDATED: upload + organizer table + brief UI</span>
+│   └── <span class="ft-file">style.css</span>            <span class="ft-comment"># Primer design tokens</span>
+├── <span class="ft-dir">uploads/</span>               <span class="ft-comment"># Temp PDF storage (session-scoped)</span>
+├── <span class="ft-dir">chroma_db/</span>             <span class="ft-comment"># Persistent vector store (session-scoped)</span>
+├── <span class="ft-new">cards_db/</span>              <span class="ft-comment"># ✦ NEW: JSON paper cards per session</span>
+├── <span class="ft-file">requirements.txt</span>
+├── <span class="ft-file">.env</span>
+└── <span class="ft-file">railway.toml</span></pre>
+  </div>
+
+
+  <!-- PAPER CARD EXTRACTION -->
+  <div class="section" id="extraction">
+    <h2>✦ Paper Cards — Structured Extraction</h2>
+    <p>This is the new feature. For every uploaded PDF, Primer makes one Claude call to extract structured fields — the same fields you've been filling in manually in your spreadsheet. The result is a JSON card stored per session.</p>
+
+    <h3>The Card Schema</h3>
+    <p>Mapped directly from your spreadsheet columns:</p>
+
+    <table class="schema-table">
+      <thead>
+        <tr>
+          <th>Field</th>
+          <th>Your Spreadsheet Column</th>
+          <th>How Extracted</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><td><span class="tag">title</span></td><td>Paper / Resource</td><td>Title section or header</td></tr>
+        <tr><td><span class="tag">venue</span></td><td>Venue</td><td>Conference/journal name</td></tr>
+        <tr><td><span class="tag">year</span></td><td>Year</td><td>Publication year (integer)</td></tr>
+        <tr><td><span class="tag">task</span></td><td>Task</td><td>e.g. "3D object detection", "domain adaptation"</td></tr>
+        <tr><td><span class="tag">modality</span></td><td>Modality</td><td>Camera, LiDAR, Camera+LiDAR, etc.</td></tr>
+        <tr><td><span class="tag">methodology</span></td><td>Key methodology / novelty</td><td>1–2 sentence summary of the core contribution</td></tr>
+        <tr><td><span class="tag">results</span></td><td>Claimed results</td><td>Key metrics as stated in the paper</td></tr>
+        <tr><td><span class="tag">datasets</span></td><td>Primary Dataset + Other Datasets</td><td>All datasets mentioned in experiments</td></tr>
+        <tr><td><span class="tag">pretraining</span></td><td>Pretraining used</td><td>Backbone/weight initialization details</td></tr>
+        <tr><td><span class="tag">code_available</span></td><td>Code / weights link</td><td>Boolean + URL if found</td></tr>
+        <tr><td><span class="tag">synthesis_note</span></td><td>Brandon's notes (your manual notes col)</td><td>AI-generated synthesis note for YOUR research question</td></tr>
+        <tr><td><span class="tag">relevance_score</span></td><td>Relevance Index</td><td>1–5 score against your research question</td></tr>
+        <tr><td><span class="tag">tier</span></td><td>Tier</td><td>Derived from relevance score + novelty</td></tr>
+      </tbody>
+    </table>
+
+    <h3>The Extraction Prompt</h3>
+    <p>This lives in <code>core/prompts.py</code>. The key design: ask Claude to output strict JSON only, no markdown, no preamble. Easy to parse, hard to hallucinate.</p>
+
+<pre><code class="language-python"># core/prompts.py
+
+EXTRACTION_PROMPT = """
+You are a research paper analysis assistant. Extract structured information
+from the provided paper text. Output ONLY valid JSON — no markdown, no preamble,
+no explanation. If a field cannot be determined from the text, use null.
+
+RESEARCH CONTEXT (use this to score relevance):
+{research_question}
+
+PAPER TEXT:
+{paper_text}
+
+Output this exact JSON schema:
+{{
+  "title": "Full paper title as written",
+  "venue": "Conference or journal name only (e.g. CVPR, Pattern Recognition)",
+  "year": 2024,
+  "task": "Primary ML task (e.g. 3D object detection, semantic segmentation)",
+  "modality": "Sensor modality (Camera, LiDAR, Camera+LiDAR, Radar, etc.)",
+  "methodology": "1-2 sentence description of the core technical contribution",
+  "results": "Key quantitative results as stated in the paper (copy exact numbers)",
+  "datasets": ["list", "of", "dataset", "names", "used"],
+  "pretraining": "Pretraining or weight initialization strategy, or null",
+  "code_available": true/false,
+  "code_url": "GitHub or project URL if mentioned, or null",
+  "synthesis_note": "2-3 sentence note on how this paper relates to the research question above. Be specific about methodology relevance.",
+  "relevance_score": 1-5,
+  "tier": 1/2/3,
+  "key_limitations": "Main limitations mentioned by authors, or null"
+}}
+
+Relevance scoring guide:
+5 = Directly addresses the research question, core methodology
+4 = Highly related, significant overlap with research question
+3 = Relevant dataset or partial methodology overlap  
+2 = Background context, loosely related
+1 = Minimal relevance
+
+Tier guide:
+1 = Must-read for this research (relevance 4-5)
+2 = Should-read (relevance 3)
+3 = Optional background (relevance 1-2)
+"""</code></pre>
+
+    <h3>The Extraction Module</h3>
+<pre><code class="language-python"># core/extract.py
+import anthropic
+import json
+import os
+from pathlib import Path
+from core.prompts import EXTRACTION_PROMPT
+
+client = anthropic.Anthropic(api_key=os.getenv("ANTHROPIC_API_KEY"))
+CARDS_DIR = Path("cards_db")
+CARDS_DIR.mkdir(exist_ok=True)
+
+
+def extract_paper_card(
+    paper_text: str,
+    filename: str,
+    research_question: str,
+    session_id: str
+) -> dict:
+    """Extract structured card from a single paper."""
+
+    # Truncate to ~60k chars to stay within context
+    # Use first 40k + last 20k to capture abstract, methods, and results
+    if len(paper_text) > 60000:
+        paper_text = paper_text[:40000] + "\n\n[...middle truncated...]\n\n" + paper_text[-20000:]
+
+    prompt = EXTRACTION_PROMPT.format(
+        research_question=research_question,
+        paper_text=paper_text
+    )
+
+    message = client.messages.create(
+        model="claude-sonnet-4-5",
+        max_tokens=1500,
+        messages=[{"role": "user", "content": prompt}]
+    )
+
+    raw = message.content[0].text.strip()
+
+    # Strip markdown code fences if Claude adds them despite instructions
+    if raw.startswith("```"):
+        raw = raw.split("\n", 1)[1].rsplit("```", 1)[0].strip()
+
+    try:
+        card = json.loads(raw)
+        card["filename"] = filename
+        card["session_id"] = session_id
+
+        # Persist card to disk
+        session_dir = CARDS_DIR / session_id
+        session_dir.mkdir(exist_ok=True)
+        card_path = session_dir / f"{filename}.json"
+        card_path.write_text(json.dumps(card, indent=2))
+
+        return card
+
+    except json.JSONDecodeError:
+        # Return minimal card on parse failure — don't crash the pipeline
+        return {
+            "title": filename,
+            "filename": filename,
+            "session_id": session_id,
+            "methodology": "Extraction failed — open paper manually",
+            "relevance_score": None,
+            "error": True
+        }
+
+
+def get_session_cards(session_id: str) -> list[dict]:
+    """Load all cards for a session."""
+    session_dir = CARDS_DIR / session_id
+    if not session_dir.exists():
+        return []
+    cards = []
+    for card_file in sorted(session_dir.glob("*.json")):
+        try:
+            cards.append(json.loads(card_file.read_text()))
+        except:
+            pass
+    return sorted(cards, key=lambda c: -(c.get("relevance_score") or 0))
+</code></pre>
+
+    <div class="callout">
+      <strong>Why truncate 40k front + 20k back?</strong> Academic papers follow a predictable structure — the abstract, introduction, and related work are at the front (where methodology context lives). Results and conclusions are at the back. The middle is usually dense implementation details that don't help with structured extraction.
+    </div>
+  </div>
+
+
+  <!-- INGESTION -->
+  <div class="section" id="ingestion">
+    <h2>PDF Ingestion</h2>
+    <p>Unchanged from v1 — extract full text with page metadata, chunk for embedding.</p>
+
+<pre><code class="language-python"># core/ingest.py
+import fitz  # PyMuPDF
+from pathlib import Path
+
+
+def extract_text(pdf_path: str) -> tuple[str, list[dict]]:
+    """
+    Returns:
+      full_text: concatenated text (for card extraction)
+      pages: list of page dicts (for chunking/embedding)
+    """
+    doc = fitz.open(pdf_path)
+    pages = []
+    full_text_parts = []
+
+    for page_num, page in enumerate(doc):
+        text = page.get_text("text").strip()
+        if text:
+            pages.append({
+                "text": text,
+                "page": page_num + 1,
+                "source": Path(pdf_path).name
+            })
+            full_text_parts.append(text)
+
+    doc.close()
+    return "\n\n".join(full_text_parts), pages
+
+
+def chunk_pages(pages: list[dict], chunk_size=800, overlap=100) -> list[dict]:
+    chunks = []
+    for page in pages:
+        words = page["text"].split()
+        for i in range(0, len(words), chunk_size - overlap):
+            chunk_words = words[i:i + chunk_size]
+            if len(chunk_words) < 50:
+                continue
+            chunks.append({
+                "text": " ".join(chunk_words),
+                "page": page["page"],
+                "source": page["source"],
+                "chunk_id": f"{page['source']}_p{page['page']}_c{i}"
+            })
+    return chunks
+</code></pre>
+  </div>
+
+
+  <!-- EMBEDDINGS -->
+  <div class="section" id="embeddings">
+    <h2>Embeddings + RAG</h2>
+    <p>Unchanged from v1. ChromaDB + sentence-transformers for local, free, zero-infra vector search.</p>
+
+<pre><code class="language-python"># core/embeddings.py
+import chromadb
+from chromadb.utils import embedding_functions
+
+ef = embedding_functions.SentenceTransformerEmbeddingFunction(
+    model_name="all-MiniLM-L6-v2"
+)
+
+def get_collection(session_id: str):
+    client = chromadb.PersistentClient(path=f"./chroma_db/{session_id}")
+    return client.get_or_create_collection(
+        name="papers",
+        embedding_function=ef
+    )
+
+def index_chunks(chunks: list[dict], session_id: str) -> int:
+    collection = get_collection(session_id)
+    collection.add(
+        documents=[c["text"] for c in chunks],
+        metadatas=[{"source": c["source"], "page": c["page"]} for c in chunks],
+        ids=[c["chunk_id"] for c in chunks]
+    )
+    return len(chunks)
+
+def retrieve(query: str, session_id: str, n_results=15) -> list[dict]:
+    collection = get_collection(session_id)
+    results = collection.query(query_texts=[query], n_results=n_results)
+    return [
+        {"text": doc, "source": meta["source"], "page": meta["page"]}
+        for doc, meta in zip(results["documents"][0], results["metadatas"][0])
+    ]
+</code></pre>
+  </div>
+
+
+  <!-- SYNTHESIS -->
+  <div class="section" id="synthesis">
+    <h2>Brief Synthesis</h2>
+    <p>Unchanged from v1. Strict grounding prompt — every claim must cite a source chunk.</p>
+
+<pre><code class="language-python"># core/synthesize.py
+import anthropic, os
+from core.embeddings import retrieve
+
+client = anthropic.Anthropic(api_key=os.getenv("ANTHROPIC_API_KEY"))
+
+SYNTHESIS_PROMPT = """
+You are a research synthesis assistant. Produce a structured research brief
+based ONLY on the provided source chunks. Every claim MUST cite its source.
+
+STRICT RULES:
+1. Cite every claim: [Filename, p.X]
+2. If a question cannot be answered from the chunks, say so explicitly
+3. Do NOT use knowledge outside the provided chunks
+4. Do NOT invent citations
+
+RESEARCH QUESTION: {research_question}
+
+SOURCE CHUNKS:
+{chunks_formatted}
+
+Output sections: Synthesis | Key Debates & Contradictions | Research Gaps | Suggested Outline
+"""
+
+def generate_brief(research_question: str, session_id: str) -> dict:
+    chunks = retrieve(research_question, session_id)
+    if not chunks:
+        return {"error": "No relevant content found in uploaded papers."}
+
+    formatted = "\n---\n".join([
+        f"[CHUNK {i+1} | {c['source']} | p.{c['page']}]\n{c['text']}"
+        for i, c in enumerate(chunks)
+    ])
+
+    message = client.messages.create(
+        model="claude-sonnet-4-5",
+        max_tokens=4000,
+        messages=[{"role": "user", "content": SYNTHESIS_PROMPT.format(
+            research_question=research_question,
+            chunks_formatted=formatted
+        )}]
+    )
+
+    return {
+        "brief": message.content[0].text,
+        "sources_used": list(set(c["source"] for c in chunks)),
+        "chunks_retrieved": len(chunks),
+        "research_question": research_question
+    }
+</code></pre>
+  </div>
+
+
+  <!-- MAIN.PY -->
+  <div class="section" id="ui">
+    <h2>FastAPI Routes</h2>
+    <p>Updated to handle both pipelines. The upload endpoint now runs card extraction and chunk indexing in parallel per file.</p>
+
+<pre><code class="language-python"># main.py
+from fastapi import FastAPI, UploadFile, File, Form, HTTPException
+from fastapi.staticfiles import StaticFiles
+from fastapi.responses import HTMLResponse, JSONResponse
+import asyncio, uuid, shutil
+from pathlib import Path
+from core.ingest import extract_text, chunk_pages
+from core.embeddings import index_chunks
+from core.extract import extract_paper_card, get_session_cards
+from core.synthesize import generate_brief
+
+app = FastAPI(title="Primer")
+app.mount("/static", StaticFiles(directory="static"), name="static")
+UPLOAD_DIR = Path("uploads")
+UPLOAD_DIR.mkdir(exist_ok=True)
+
+
+@app.get("/", response_class=HTMLResponse)
+async def root():
+    return open("static/index.html").read()
+
+
+@app.post("/api/upload")
+async def upload_papers(
+    files: list[UploadFile] = File(...),
+    research_question: str = Form(...),   # ← now required at upload time
+    session_id: str = Form(None)
+):
+    if not session_id:
+        session_id = str(uuid.uuid4())
+
+    session_dir = UPLOAD_DIR / session_id
+    session_dir.mkdir(exist_ok=True)
+
+    results = []
+
+    for file in files:
+        if not file.filename.endswith(".pdf"):
+            continue
+
+        # Save to disk
+        file_path = session_dir / file.filename
+        with open(file_path, "wb") as f:
+            shutil.copyfileobj(file.file, f)
+
+        # Extract text (used by BOTH pipelines)
+        full_text, pages = extract_text(str(file_path))
+
+        # Pipeline A: structured card extraction (Claude call per paper)
+        card = extract_paper_card(
+            paper_text=full_text,
+            filename=file.filename,
+            research_question=research_question,
+            session_id=session_id
+        )
+
+        # Pipeline B: chunk + index for RAG
+        chunks = chunk_pages(pages)
+        n_chunks = index_chunks(chunks, session_id)
+
+        results.append({
+            "filename": file.filename,
+            "chunks_indexed": n_chunks,
+            "card_extracted": not card.get("error"),
+            "relevance_score": card.get("relevance_score"),
+            "title": card.get("title", file.filename)
+        })
+
+    return {
+        "session_id": session_id,
+        "papers": results,
+        "total_papers": len(results)
+    }
+
+
+@app.get("/api/cards/{session_id}")
+async def get_cards(session_id: str):
+    """Return all extracted paper cards for a session, sorted by relevance."""
+    cards = get_session_cards(session_id)
+    return {"cards": cards, "count": len(cards)}
+
+
+@app.post("/api/synthesize")
+async def synthesize(
+    session_id: str = Form(...),
+    research_question: str = Form(...)
+):
+    """Generate grounded research brief from indexed chunks."""
+    if not research_question.strip():
+        raise HTTPException(400, "Research question required.")
+    result = generate_brief(research_question, session_id)
+    return JSONResponse(result)
+</code></pre>
+
+    <h3>Frontend — Paper Organizer + Brief UI</h3>
+    <p>The UI now has three stages: upload → card table → brief generation. The table is sortable by relevance score and mimics your spreadsheet layout.</p>
+
+<pre><code class="language-javascript">&lt;!-- static/index.html — key JS logic --&gt;
+
+// After upload, render paper cards as a sortable table
+function renderCards(cards) {
+  const rows = cards.map(card => `
+    &lt;tr class="tier-${card.tier || 3}"&gt;
+      &lt;td&gt;&lt;strong&gt;${card.title || card.filename}&lt;/strong&gt;&lt;/td&gt;
+      &lt;td&gt;${card.venue || '—'}&lt;/td&gt;
+      &lt;td&gt;${card.year || '—'}&lt;/td&gt;
+      &lt;td&gt;${card.task || '—'}&lt;/td&gt;
+      &lt;td&gt;${card.methodology || '—'}&lt;/td&gt;
+      &lt;td&gt;${card.results || '—'}&lt;/td&gt;
+      &lt;td&gt;${(card.datasets || []).join(', ') || '—'}&lt;/td&gt;
+      &lt;td class="score score-${card.relevance_score}"&gt;${card.relevance_score || '?'}/5&lt;/td&gt;
+      &lt;td class="note"&gt;${card.synthesis_note || '—'}&lt;/td&gt;
+    &lt;/tr&gt;
+  `).join('');
+
+  document.getElementById('card-table').innerHTML = `
+    &lt;table&gt;
+      &lt;thead&gt;
+        &lt;tr&gt;
+          &lt;th&gt;Title&lt;/th&gt;&lt;th&gt;Venue&lt;/th&gt;&lt;th&gt;Task&lt;/th&gt;
+          &lt;th&gt;Methodology&lt;/th&gt;&lt;th&gt;Results&lt;/th&gt;
+          &lt;th&gt;Datasets&lt;/th&gt;&lt;th&gt;Relevance&lt;/th&gt;&lt;th&gt;Note&lt;/th&gt;
+        &lt;/tr&gt;
+      &lt;/thead&gt;
+      &lt;tbody&gt;${rows}&lt;/tbody&gt;
+    &lt;/table&gt;
+  `;
+}
+
+// Export cards as CSV — matches your spreadsheet format exactly
+function exportCSV(cards) {
+  const headers = ['Title','Venue','Year','Task','Modality','Methodology',
+    'Results','Datasets','Pretraining','Code Available','Relevance','Tier','Notes'];
+  const rows = cards.map(c => [
+    c.title, c.venue, c.year, c.task, c.modality, c.methodology,
+    c.results, (c.datasets||[]).join('; '), c.pretraining,
+    c.code_available ? 'Yes' : 'No', c.relevance_score, c.tier, c.synthesis_note
+  ].map(v => `"${(v||'').toString().replace(/"/g,'""')}"`).join(','));
+
+  const csv = [headers.join(','), ...rows].join('\n');
+  const blob = new Blob([csv], {type: 'text/csv'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'primer-paper-cards.csv';
+  a.click();
+}
+</code></pre>
+
+    <div class="callout green">
+      <strong>The CSV export button is the killer feature moment.</strong> A researcher uploads 20 papers, gets a populated table in ~2 minutes, clicks export, and opens a perfectly formatted spreadsheet that would have taken them 4 hours to fill manually. That's the overdeliver. That's what gets shared.
+    </div>
+  </div>
+
+
+  <!-- BUILD PLAN -->
+  <div class="section">
+    <h2>5-Day Build Plan</h2>
+
+    <div class="day-card" id="day1">
+      <div class="day-header">
+        <span class="day-num">Day 1</span>
+        <span class="day-title">PDF Ingestion Pipeline</span>
+        <span class="day-badge badge-same">Unchanged</span>
+      </div>
+      <div class="day-body">
+        Build <code>core/ingest.py</code> — extract_text() returns both full_text (for cards) and pages list (for chunking). Test on 5 real papers from your AV perception literature. Confirm clean text extraction, no garbled characters, metadata intact.
+      </div>
+    </div>
+
+    <div class="day-card new" id="day2">
+      <div class="day-header">
+        <span class="day-num">Day 2</span>
+        <span class="day-title">Paper Card Extraction</span>
+        <span class="day-badge badge-new">✦ New</span>
+      </div>
+      <div class="day-body">
+        Build <code>core/extract.py</code> and the extraction prompt. Test heavily — upload your BDD100K papers from the spreadsheet and verify the extracted fields match what you filled in manually. Tune the prompt until relevance scores feel accurate. This is the highest-leverage day — the prompt is the product here.
+        <br><br>
+        <strong>Acceptance criteria:</strong> Upload YOLOPX paper → extracted methodology matches your manual notes → relevance score relative to "multi-task driving perception" is 4 or 5.
+      </div>
+    </div>
+
+    <div class="day-card" id="day3">
+      <div class="day-header">
+        <span class="day-num">Day 3</span>
+        <span class="day-title">Embeddings + ChromaDB</span>
+        <span class="day-badge badge-same">Unchanged</span>
+      </div>
+      <div class="day-body">
+        Build <code>core/embeddings.py</code>. Index all chunks from your test papers. Run semantic search queries manually to verify retrieval quality before wiring up synthesis.
+      </div>
+    </div>
+
+    <div class="day-card" id="day4">
+      <div class="day-header">
+        <span class="day-num">Day 4</span>
+        <span class="day-title">Synthesis + FastAPI Routes</span>
+        <span class="day-badge badge-updated">Updated</span>
+      </div>
+      <div class="day-body">
+        Build <code>core/synthesize.py</code> and wire everything into <code>main.py</code>. The upload endpoint now runs both pipelines. Stress test the synthesis grounding — ask questions the papers don't answer and confirm it says "not addressed" rather than hallucinating.
+      </div>
+    </div>
+
+    <div class="day-card new" id="day5">
+      <div class="day-header">
+        <span class="day-num">Day 5</span>
+        <span class="day-title">UI + CSV Export + Deploy</span>
+        <span class="day-badge badge-new">✦ Updated</span>
+      </div>
+      <div class="day-body">
+        Build the three-stage UI: upload form → card table with relevance sorting → brief generation. Add the CSV export button. Deploy to Railway. Test the full end-to-end flow with 10+ real papers. Share the URL with one real researcher and watch them use it.
+      </div>
+    </div>
+  </div>
+
+
+  <!-- DEPLOY -->
+  <div class="section" id="deploy">
+    <h2>Deploy — Railway</h2>
+
+<pre><code class="language-none"># requirements.txt
+fastapi
+uvicorn[standard]
+python-multipart
+pymupdf
+chromadb
+sentence-transformers
+anthropic
+python-dotenv</code></pre>
+
+<pre><code class="language-toml"># railway.toml
+[build]
+builder = "nixpacks"
+
+[deploy]
+startCommand = "uvicorn main:app --host 0.0.0.0 --port $PORT"</code></pre>
+
+<pre><code class="language-bash"># .env (local only — never commit)
+ANTHROPIC_API_KEY=sk-ant-...
+
+# Railway: set via dashboard → Variables
+# ANTHROPIC_API_KEY → your key</code></pre>
+
+<pre><code class="language-bash"># Deploy commands
+npm install -g @railway/cli
+railway login
+railway init
+railway up
+railway open    # opens your live URL</code></pre>
+  </div>
+
+
+  <!-- TEST PROTOCOL -->
+  <div class="section" id="test">
+    <h2>Test Protocol — Day 5</h2>
+    <p>Before the URL goes to anyone, run these tests in order:</p>
+
+    <h3>Card Extraction Tests</h3>
+    <ul class="checklist">
+      <li>Upload YOLOPX paper → verify methodology, results, and datasets match your manual spreadsheet entry</li>
+      <li>Upload a paper with no GitHub link → confirm <code>code_available: false</code>, not hallucinated URL</li>
+      <li>Upload a paper tangentially related to your question → confirm relevance score is 2 or 3, not 5</li>
+      <li>Upload a paper entirely outside your research area → confirm relevance score is 1</li>
+      <li>Export CSV → open in Excel/Sheets → confirm column alignment matches your spreadsheet format</li>
+    </ul>
+
+    <h3>Synthesis Grounding Tests</h3>
+    <ul class="checklist">
+      <li>Ask a question directly answered in the papers → brief cites specific filenames and page numbers</li>
+      <li>Ask a question the papers don't address → brief says "not addressed in provided literature" rather than inventing an answer</li>
+      <li>Manually spot-check 3 citations → find the quoted text in the actual PDF</li>
+      <li>Ask the same question twice → outputs are consistent, not randomly different</li>
+    </ul>
+
+    <h3>Robustness Tests</h3>
+    <ul class="checklist">
+      <li>Upload 15 PDFs at once → all process without timeout or memory error</li>
+      <li>Upload a scanned PDF with poor OCR → system handles gracefully, doesn't crash</li>
+      <li>Leave session overnight → cards and index still accessible next morning</li>
+    </ul>
+
+    <div class="callout green">
+      <strong>If you pass all of these:</strong> The product is honest, works as advertised, and ready for real researchers. Put the URL in the waitlist welcome email.
+    </div>
+  </div>
+
+
+  <div class="spacer-xl"></div>
+
+</main>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-toml.min.js"></script>
+</body>
+</html>

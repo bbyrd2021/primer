@@ -1,0 +1,2864 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Primer — Product Requirements Document</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,900;1,400&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600&family=JetBrains+Mono:wght@400;500&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      *,
+      *::before,
+      *::after {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+
+      :root {
+        --ink: #110d0d;
+        --ink-2: #1c1515;
+        --maroon: #7a1525;
+        --maroon-br: #9b2535;
+        --cream: #f6f2eb;
+        --cream-dim: #c8c0b4;
+        --surface: #f4f3f0;
+        --white: #ffffff;
+        --muted: #8a8078;
+        --rule: rgba(0, 0, 0, 0.07);
+        --green: #2d7a4f;
+        --amber: #b07818;
+        --blue: #2d5a9b;
+        --code-bg: #1a1414;
+        --code-text: #e8e0d5;
+      }
+
+      html {
+        scroll-behavior: smooth;
+      }
+      body {
+        font-family: "DM Sans", sans-serif;
+        background: var(--white);
+        color: var(--ink);
+        -webkit-font-smoothing: antialiased;
+        line-height: 1.6;
+      }
+
+      /* ── SIDEBAR ── */
+      .sidebar {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 256px;
+        height: 100vh;
+        background: var(--ink-2);
+        padding: 28px 20px;
+        overflow-y: auto;
+        z-index: 100;
+        display: flex;
+        flex-direction: column;
+      }
+
+      .sidebar::-webkit-scrollbar {
+        width: 4px;
+      }
+      .sidebar::-webkit-scrollbar-thumb {
+        background: rgba(255, 255, 255, 0.1);
+        border-radius: 2px;
+      }
+
+      .s-logo {
+        font-family: "Playfair Display", serif;
+        font-weight: 700;
+        font-size: 20px;
+        color: var(--cream);
+        letter-spacing: -0.01em;
+        margin-bottom: 2px;
+      }
+      .s-logo .ri {
+        font-style: italic;
+        color: var(--maroon-br);
+      }
+      .s-doc-type {
+        font-size: 10px;
+        font-weight: 600;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+        color: rgba(200, 192, 180, 0.35);
+        margin-bottom: 32px;
+      }
+
+      .s-section {
+        font-size: 10px;
+        font-weight: 600;
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+        color: rgba(200, 192, 180, 0.28);
+        margin: 20px 0 6px;
+        padding-left: 8px;
+      }
+
+      .s-link {
+        display: block;
+        font-size: 12.5px;
+        font-weight: 400;
+        color: rgba(200, 192, 180, 0.55);
+        text-decoration: none;
+        padding: 4px 8px;
+        border-radius: 5px;
+        border-left: 2px solid transparent;
+        transition: all 0.15s;
+        line-height: 1.4;
+      }
+      .s-link:hover {
+        color: var(--cream);
+        background: rgba(255, 255, 255, 0.04);
+      }
+      .s-link.active {
+        color: var(--cream);
+        border-left-color: var(--maroon-br);
+        background: rgba(122, 21, 37, 0.1);
+      }
+
+      .s-meta {
+        margin-top: auto;
+        padding-top: 24px;
+        border-top: 1px solid rgba(255, 255, 255, 0.06);
+      }
+      .s-meta-row {
+        font-size: 11px;
+        color: rgba(200, 192, 180, 0.3);
+        margin-bottom: 4px;
+      }
+      .s-meta-row strong {
+        color: rgba(200, 192, 180, 0.5);
+        font-weight: 500;
+      }
+
+      /* ── MAIN ── */
+      .main {
+        margin-left: 256px;
+        padding: 72px 80px;
+        max-width: 1100px;
+      }
+
+      /* ── TYPOGRAPHY ── */
+      .doc-label {
+        font-size: 11px;
+        font-weight: 600;
+        letter-spacing: 0.13em;
+        text-transform: uppercase;
+        color: var(--maroon);
+        margin-bottom: 14px;
+      }
+
+      h1 {
+        font-family: "Playfair Display", serif;
+        font-weight: 900;
+        font-size: 64px;
+        letter-spacing: -0.04em;
+        line-height: 0.92;
+        color: var(--ink);
+        margin-bottom: 24px;
+      }
+      h1 .ri {
+        font-style: italic;
+        color: var(--maroon);
+      }
+
+      h2 {
+        font-family: "Playfair Display", serif;
+        font-weight: 700;
+        font-size: 32px;
+        letter-spacing: -0.025em;
+        color: var(--ink);
+        margin: 64px 0 20px;
+        padding-bottom: 14px;
+        border-bottom: 1px solid var(--rule);
+      }
+
+      h3 {
+        font-size: 17px;
+        font-weight: 600;
+        color: var(--ink);
+        margin: 32px 0 10px;
+        letter-spacing: -0.01em;
+      }
+
+      h4 {
+        font-size: 13px;
+        font-weight: 600;
+        color: var(--muted);
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
+        margin: 20px 0 8px;
+      }
+
+      p {
+        font-size: 15px;
+        font-weight: 300;
+        color: #3d3830;
+        line-height: 1.78;
+        margin-bottom: 14px;
+        max-width: 72ch;
+      }
+
+      strong {
+        font-weight: 600;
+        color: var(--ink);
+      }
+      em {
+        font-style: italic;
+        color: var(--muted);
+      }
+
+      /* ── HERO META ── */
+      .hero-meta {
+        display: flex;
+        gap: 32px;
+        margin: 32px 0 56px;
+        padding: 24px 0;
+        border-top: 1px solid var(--rule);
+        border-bottom: 1px solid var(--rule);
+      }
+      .hm-item {
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+      }
+      .hm-label {
+        font-size: 10px;
+        font-weight: 600;
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+        color: var(--muted);
+      }
+      .hm-value {
+        font-size: 13px;
+        font-weight: 500;
+        color: var(--ink);
+      }
+      .hm-value.status-building {
+        color: var(--amber);
+        display: flex;
+        align-items: center;
+        gap: 6px;
+      }
+      .hm-dot {
+        width: 7px;
+        height: 7px;
+        border-radius: 50%;
+        background: var(--amber);
+        animation: pulse 2s ease infinite;
+      }
+      @keyframes pulse {
+        0%,
+        100% {
+          opacity: 1;
+        }
+        50% {
+          opacity: 0.35;
+        }
+      }
+
+      /* ── SECTION ── */
+      .section {
+        margin-bottom: 72px;
+      }
+
+      /* ── CALLOUTS ── */
+      .callout {
+        border-left: 3px solid var(--maroon);
+        background: rgba(122, 21, 37, 0.04);
+        border-radius: 0 8px 8px 0;
+        padding: 16px 20px;
+        margin: 20px 0;
+        font-size: 14px;
+        font-weight: 300;
+        color: #3d3830;
+        line-height: 1.7;
+        max-width: 72ch;
+      }
+      .callout strong {
+        color: var(--maroon);
+      }
+      .callout.green {
+        border-left-color: var(--green);
+        background: rgba(45, 122, 79, 0.04);
+      }
+      .callout.green strong {
+        color: var(--green);
+      }
+      .callout.amber {
+        border-left-color: var(--amber);
+        background: rgba(176, 120, 24, 0.04);
+      }
+      .callout.amber strong {
+        color: var(--amber);
+      }
+      .callout.blue {
+        border-left-color: var(--blue);
+        background: rgba(45, 90, 155, 0.04);
+      }
+      .callout.blue strong {
+        color: var(--blue);
+      }
+
+      /* ── ASSUMPTION TAG ── */
+      .assumption {
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+        background: rgba(176, 120, 24, 0.08);
+        border: 1px solid rgba(176, 120, 24, 0.2);
+        border-radius: 4px;
+        padding: 2px 8px;
+        font-size: 11px;
+        font-weight: 500;
+        color: var(--amber);
+        font-family: "JetBrains Mono", monospace;
+        vertical-align: middle;
+        margin-left: 6px;
+      }
+
+      /* ── PERSONA CARDS ── */
+      .persona-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 16px;
+        margin: 20px 0;
+      }
+      .persona {
+        border: 1px solid var(--rule);
+        border-radius: 12px;
+        padding: 24px 22px;
+        background: var(--white);
+        transition: border-color 0.2s;
+      }
+      .persona:hover {
+        border-color: rgba(0, 0, 0, 0.14);
+      }
+      .persona.primary {
+        border-color: rgba(122, 21, 37, 0.25);
+        background: rgba(122, 21, 37, 0.02);
+      }
+      .persona-name {
+        font-size: 14px;
+        font-weight: 600;
+        color: var(--ink);
+        margin-bottom: 4px;
+      }
+      .persona-role {
+        font-size: 11px;
+        font-weight: 500;
+        color: var(--maroon);
+        letter-spacing: 0.04em;
+        text-transform: uppercase;
+        margin-bottom: 14px;
+      }
+      .persona-detail {
+        font-size: 12px;
+        font-weight: 300;
+        color: var(--muted);
+        line-height: 1.6;
+        margin-bottom: 8px;
+      }
+      .persona-pain {
+        font-size: 12px;
+        font-weight: 400;
+        color: var(--ink);
+        font-style: italic;
+        padding: 10px 12px;
+        background: var(--surface);
+        border-radius: 6px;
+        margin-top: 12px;
+        line-height: 1.5;
+      }
+
+      /* ── FEATURE TABLE ── */
+      .feature-table {
+        width: 100%;
+        border-collapse: collapse;
+        margin: 16px 0 32px;
+        font-size: 13.5px;
+      }
+      .feature-table th {
+        background: var(--ink);
+        color: var(--cream);
+        padding: 11px 18px;
+        text-align: left;
+        font-weight: 500;
+        font-size: 11px;
+        letter-spacing: 0.07em;
+        text-transform: uppercase;
+      }
+      .feature-table th:first-child {
+        border-radius: 8px 0 0 0;
+      }
+      .feature-table th:last-child {
+        border-radius: 0 8px 0 0;
+      }
+      .feature-table td {
+        padding: 12px 18px;
+        border-bottom: 1px solid var(--rule);
+        vertical-align: top;
+        line-height: 1.55;
+        color: #3d3830;
+        font-weight: 300;
+      }
+      .feature-table tr:last-child td {
+        border-bottom: none;
+      }
+      .feature-table tr:nth-child(even) td {
+        background: #fafaf9;
+      }
+      .feature-table td:first-child {
+        font-weight: 500;
+        color: var(--ink);
+      }
+
+      /* ── PRIORITY BADGES ── */
+      .p1 {
+        display: inline-block;
+        background: rgba(122, 21, 37, 0.1);
+        color: var(--maroon);
+        font-size: 10px;
+        font-weight: 600;
+        padding: 2px 7px;
+        border-radius: 4px;
+        letter-spacing: 0.05em;
+      }
+      .p2 {
+        display: inline-block;
+        background: rgba(176, 120, 24, 0.1);
+        color: var(--amber);
+        font-size: 10px;
+        font-weight: 600;
+        padding: 2px 7px;
+        border-radius: 4px;
+        letter-spacing: 0.05em;
+      }
+      .p3 {
+        display: inline-block;
+        background: rgba(0, 0, 0, 0.06);
+        color: var(--muted);
+        font-size: 10px;
+        font-weight: 600;
+        padding: 2px 7px;
+        border-radius: 4px;
+        letter-spacing: 0.05em;
+      }
+      .later {
+        display: inline-block;
+        background: rgba(45, 90, 155, 0.08);
+        color: var(--blue);
+        font-size: 10px;
+        font-weight: 600;
+        padding: 2px 7px;
+        border-radius: 4px;
+        letter-spacing: 0.05em;
+      }
+
+      /* ── USER FLOW ── */
+      .flow {
+        display: flex;
+        align-items: stretch;
+        gap: 0;
+        margin: 20px 0;
+        flex-wrap: wrap;
+      }
+      .flow-step {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 0;
+      }
+      .flow-box {
+        background: var(--surface);
+        border: 1px solid var(--rule);
+        border-radius: 8px;
+        padding: 14px 18px;
+        font-size: 13px;
+        font-weight: 500;
+        color: var(--ink);
+        text-align: center;
+        white-space: nowrap;
+      }
+      .flow-box.highlight {
+        background: rgba(122, 21, 37, 0.07);
+        border-color: rgba(122, 21, 37, 0.2);
+        color: var(--maroon);
+      }
+      .flow-box.new {
+        background: rgba(45, 122, 79, 0.07);
+        border-color: rgba(45, 122, 79, 0.2);
+        color: var(--green);
+      }
+      .flow-sub {
+        font-size: 10px;
+        font-weight: 300;
+        color: var(--muted);
+        margin-top: 5px;
+        text-align: center;
+        max-width: 120px;
+      }
+      .flow-arrow {
+        padding: 0 10px;
+        color: var(--muted);
+        font-size: 18px;
+        display: flex;
+        align-items: center;
+        margin-top: -18px;
+      }
+
+      /* ── METRICS ── */
+      .metrics-grid {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 12px;
+        margin: 20px 0;
+      }
+      .metric-box {
+        background: var(--ink);
+        border-radius: 10px;
+        padding: 20px 18px;
+        text-align: center;
+      }
+      .metric-num {
+        font-family: "Playfair Display", serif;
+        font-weight: 700;
+        font-size: 32px;
+        color: var(--cream);
+        letter-spacing: -0.03em;
+        line-height: 1;
+        margin-bottom: 6px;
+      }
+      .metric-num .ri {
+        color: var(--maroon-br);
+        font-style: italic;
+      }
+      .metric-label {
+        font-size: 11px;
+        font-weight: 400;
+        color: rgba(200, 192, 180, 0.45);
+        letter-spacing: 0.04em;
+      }
+
+      /* ── RISK TABLE ── */
+      .risk-table {
+        width: 100%;
+        border-collapse: collapse;
+        margin: 16px 0;
+        font-size: 13px;
+      }
+      .risk-table th {
+        background: var(--surface);
+        color: var(--muted);
+        padding: 9px 16px;
+        text-align: left;
+        font-weight: 600;
+        font-size: 10px;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        border-bottom: 1px solid var(--rule);
+      }
+      .risk-table td {
+        padding: 12px 16px;
+        border-bottom: 1px solid var(--rule);
+        font-weight: 300;
+        color: #3d3830;
+        vertical-align: top;
+        line-height: 1.55;
+      }
+      .risk-table tr:last-child td {
+        border-bottom: none;
+      }
+      .risk-high {
+        color: #c0392b;
+        font-weight: 600;
+        font-size: 11px;
+      }
+      .risk-med {
+        color: var(--amber);
+        font-weight: 600;
+        font-size: 11px;
+      }
+      .risk-low {
+        color: var(--green);
+        font-weight: 600;
+        font-size: 11px;
+      }
+
+      /* Prism: PostgreSQL types not in the generic SQL grammar */
+      .token.pg-type { color: #cc99cd; }
+
+      /* ── SCHEMA ── */
+      pre.schema {
+        background: var(--code-bg);
+        border-radius: 10px;
+        padding: 24px 28px;
+        margin: 16px 0;
+        overflow-x: auto;
+      }
+
+      pre.schema > code {
+        font-family: "JetBrains Mono", monospace;
+        font-size: 12.5px;
+        line-height: 1.8;
+        color: var(--code-text);
+        background: none;
+        padding: 0;
+      }
+
+      /* ── NON GOALS ── */
+      .nongoal-list {
+        list-style: none;
+        margin: 12px 0;
+      }
+      .nongoal-list li {
+        font-size: 14px;
+        font-weight: 300;
+        color: #3d3830;
+        padding: 8px 0 8px 28px;
+        border-bottom: 1px solid var(--rule);
+        position: relative;
+        line-height: 1.55;
+      }
+      .nongoal-list li:last-child {
+        border-bottom: none;
+      }
+      .nongoal-list li::before {
+        content: "✕";
+        position: absolute;
+        left: 0;
+        color: var(--muted);
+        font-size: 12px;
+        top: 10px;
+      }
+
+      /* ── OPEN QUESTIONS ── */
+      .oq-list {
+        list-style: none;
+        margin: 12px 0;
+        counter-reset: oq;
+      }
+      .oq-list li {
+        counter-increment: oq;
+        font-size: 14px;
+        font-weight: 300;
+        color: #3d3830;
+        padding: 12px 0 12px 36px;
+        border-bottom: 1px solid var(--rule);
+        position: relative;
+        line-height: 1.6;
+      }
+      .oq-list li:last-child {
+        border-bottom: none;
+      }
+      .oq-list li::before {
+        content: counter(oq);
+        position: absolute;
+        left: 0;
+        font-family: "Playfair Display", serif;
+        font-style: italic;
+        font-size: 13px;
+        color: var(--maroon);
+        top: 14px;
+      }
+      .oq-note {
+        font-size: 12px;
+        color: var(--muted);
+        margin-top: 4px;
+        font-style: italic;
+      }
+
+      /* ── INLINE TAG ── */
+      .tag {
+        display: inline-block;
+        background: var(--surface);
+        border: 1px solid var(--rule);
+        border-radius: 4px;
+        padding: 1px 7px;
+        font-size: 12px;
+        font-family: "JetBrains Mono", monospace;
+        color: var(--maroon);
+      }
+
+      /* ── ROADMAP ── */
+      .roadmap {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 16px;
+        margin: 20px 0;
+      }
+      .phase {
+        border: 1px solid var(--rule);
+        border-radius: 12px;
+        overflow: hidden;
+      }
+      .phase-header {
+        padding: 14px 20px;
+        font-size: 12px;
+        font-weight: 600;
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
+      }
+      .phase-header.mvp {
+        background: var(--maroon);
+        color: var(--cream);
+      }
+      .phase-header.v2 {
+        background: var(--ink);
+        color: var(--cream);
+      }
+      .phase-header.v3 {
+        background: var(--surface);
+        color: var(--muted);
+      }
+      .phase-timeline {
+        font-size: 11px;
+        font-weight: 400;
+        opacity: 0.6;
+        margin-top: 2px;
+      }
+      .phase-body {
+        padding: 16px 20px;
+      }
+      .phase-item {
+        font-size: 13px;
+        font-weight: 300;
+        color: #3d3830;
+        padding: 5px 0;
+        border-bottom: 1px solid var(--rule);
+        line-height: 1.4;
+      }
+      .phase-item:last-child {
+        border-bottom: none;
+      }
+
+      /* ── CHAT UI SPEC ── */
+      .chat-spec {
+        border: 1px solid var(--rule);
+        border-radius: 12px;
+        overflow: hidden;
+        margin: 20px 0;
+      }
+      .chat-header {
+        background: var(--ink);
+        padding: 12px 20px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+      }
+      .chat-header-title {
+        font-size: 13px;
+        font-weight: 500;
+        color: var(--cream);
+      }
+      .chat-header-sub {
+        font-size: 11px;
+        color: rgba(200, 192, 180, 0.4);
+        margin-left: auto;
+      }
+      .chat-body {
+        padding: 20px;
+        background: var(--surface);
+        display: flex;
+        flex-direction: column;
+        gap: 14px;
+      }
+      .chat-msg {
+        max-width: 80%;
+        font-size: 13px;
+        line-height: 1.6;
+        padding: 12px 16px;
+        border-radius: 10px;
+      }
+      .chat-msg.user {
+        align-self: flex-end;
+        background: var(--maroon);
+        color: var(--cream);
+        border-radius: 10px 10px 2px 10px;
+      }
+      .chat-msg.ai {
+        align-self: flex-start;
+        background: var(--white);
+        color: var(--ink);
+        border: 1px solid var(--rule);
+        border-radius: 10px 10px 10px 2px;
+        font-weight: 300;
+      }
+      .chat-cite {
+        font-size: 11px;
+        color: var(--maroon);
+        font-style: italic;
+        margin-top: 6px;
+      }
+      .chat-footer {
+        padding: 14px 20px;
+        background: var(--white);
+        border-top: 1px solid var(--rule);
+        display: flex;
+        gap: 10px;
+        align-items: center;
+      }
+      .chat-input-mock {
+        flex: 1;
+        background: var(--surface);
+        border: 1px solid var(--rule);
+        border-radius: 8px;
+        padding: 10px 14px;
+        font-size: 13px;
+        color: var(--muted);
+        font-family: "DM Sans", sans-serif;
+      }
+      .chat-send-mock {
+        background: var(--maroon);
+        color: var(--cream);
+        border: none;
+        border-radius: 8px;
+        padding: 10px 18px;
+        font-size: 13px;
+        font-weight: 500;
+        cursor: pointer;
+      }
+
+      /* ── PRINT ── */
+      @media print {
+        .sidebar {
+          display: none;
+        }
+        .main {
+          margin-left: 0;
+          padding: 40px;
+        }
+        h2 {
+          page-break-before: always;
+        }
+      }
+
+      /* ── UTILITY ── */
+      .section--cover {
+        margin-bottom: 48px;
+      }
+      .flow--wrap {
+        flex-wrap: wrap;
+        gap: 8px;
+        row-gap: 16px;
+      }
+      .flow-arrow--inline {
+        margin-top: 0;
+      }
+      .grounding-steps {
+        margin: 12px 0 20px;
+        padding-left: 24px;
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+      }
+      .grounding-steps li {
+        font-size: 15px;
+        font-weight: 300;
+        color: #3d3830;
+        line-height: 1.7;
+      }
+      .metrics-grid--3col {
+        grid-template-columns: repeat(3, 1fr);
+      }
+      .doc-footer {
+        height: 100px;
+        border-top: 1px solid var(--rule);
+        margin-top: 40px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+      .doc-footer__wordmark {
+        font-family: "Playfair Display", serif;
+        font-weight: 700;
+        font-size: 24px;
+        color: var(--ink);
+        letter-spacing: -0.02em;
+      }
+      .doc-footer__wordmark .ri {
+        font-style: italic;
+        color: var(--maroon);
+      }
+    </style>
+  </head>
+  <body>
+    <!-- SIDEBAR -->
+    <nav class="sidebar">
+      <div class="s-logo">P<span class="ri">ri</span>mer</div>
+      <div class="s-doc-type">Product Requirements Doc</div>
+
+      <div class="s-section">Foundation</div>
+      <a href="#vision" class="s-link">01 — Vision & Positioning</a>
+      <a href="#problem" class="s-link">02 — Problem Statement</a>
+      <a href="#personas" class="s-link">03 — User Personas</a>
+
+      <div class="s-section">Product</div>
+      <a href="#core-concept" class="s-link">04 — Core Concept</a>
+      <a href="#user-flows" class="s-link">05 — User Flows</a>
+      <a href="#features" class="s-link">06 — Feature Requirements</a>
+      <a href="#chat" class="s-link">07 — Chat Interface</a>
+      <a href="#paper-cards" class="s-link">08 — Paper Cards</a>
+      <a href="#brief" class="s-link">09 — Research Brief</a>
+      <a href="#exports" class="s-link">10 — Exports</a>
+
+      <div class="s-section">Technical</div>
+      <a href="#architecture" class="s-link">11 — Architecture</a>
+      <a href="#data-model" class="s-link">12 — Data Model</a>
+      <a href="#grounding" class="s-link">13 — Grounding System</a>
+
+      <div class="s-section">Business</div>
+      <a href="#pricing" class="s-link">14 — Pricing Model</a>
+      <a href="#metrics" class="s-link">15 — Success Metrics</a>
+      <a href="#roadmap" class="s-link">16 — Roadmap</a>
+      <a href="#risks" class="s-link">17 — Risks</a>
+      <a href="#nongoals" class="s-link">18 — Non-Goals</a>
+      <a href="#open-questions" class="s-link">19 — Open Questions</a>
+      <a href="#assumptions" class="s-link">20 — Assumptions Log</a>
+
+      <div class="s-meta">
+        <div class="s-meta-row"><strong>Version</strong> 1.0</div>
+        <div class="s-meta-row"><strong>Status</strong> Pre-build</div>
+        <div class="s-meta-row"><strong>Author</strong> Brandon</div>
+        <div class="s-meta-row"><strong>Date</strong> Feb 2026</div>
+      </div>
+    </nav>
+
+    <!-- MAIN -->
+    <main class="main">
+      <!-- COVER -->
+      <div class="section section--cover">
+        <div class="doc-label">Product Requirements Document · v1.0</div>
+        <h1>P<span class="ri">ri</span>mer</h1>
+        <div class="hero-meta">
+          <div class="hm-item">
+            <span class="hm-label">Status</span>
+            <span class="hm-value status-building"
+              ><span class="hm-dot"></span>In Development</span
+            >
+          </div>
+          <div class="hm-item">
+            <span class="hm-label">Target Launch</span>
+            <span class="hm-value">MVP in 5 days</span>
+          </div>
+          <div class="hm-item">
+            <span class="hm-label">Primary Metric</span>
+            <span class="hm-value">Organic share from first user</span>
+          </div>
+          <div class="hm-item">
+            <span class="hm-label">Pricing</span>
+            <span class="hm-value">$0 free / $19 Pro</span>
+          </div>
+          <div class="hm-item">
+            <span class="hm-label">Stack</span>
+            <span class="hm-value">FastAPI · Claude API · ChromaDB</span>
+          </div>
+        </div>
+        <p>
+          Primer is a conversational research intelligence tool. Researchers
+          upload their literature — up to 50 PDFs — state a research question,
+          and get a grounded assistant that knows only those papers. Every
+          answer cites a real source. Nothing is invented. It is the pre-writing
+          layer that no existing tool covers.
+        </p>
+      </div>
+
+      <!-- 01 VISION -->
+      <div class="section" id="vision">
+        <h2>01 — Vision & Positioning</h2>
+
+        <h3>One-line pitch</h3>
+        <p>
+          <strong
+            >Primer is the research assistant that only knows what you've read —
+            and proves it.</strong
+          >
+        </p>
+
+        <h3>Product vision</h3>
+        <p>
+          In five years, every serious researcher has a Primer project for every
+          paper they write. It holds their literature, surfaces what they've
+          missed, tells them where the gaps are, and helps them walk into any
+          writing tool with a structured foundation. It never hallucinates. It
+          never forgets. It costs less than a textbook per month.
+        </p>
+
+        <h3>Market position</h3>
+        <div class="callout">
+          <strong>The gap Primer fills:</strong> Elicit and Consensus help you
+          <em>find</em> papers. Zotero helps you <em>manage</em> them. Prism and
+          Jenni help you <em>write</em>. Nobody owns the stage in between — the
+          messy, hours-long process of reading, synthesizing, and making sense
+          of 30–50 papers before a single word of the lit review is written.
+          That's Primer's territory.
+        </div>
+
+        <h3>Positioning relative to competitors</h3>
+        <table class="feature-table">
+          <thead>
+            <tr>
+              <th>Tool</th>
+              <th>What it does</th>
+              <th>What it doesn't do</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Elicit / Consensus</td>
+              <td>Finds papers semantically</td>
+              <td>Doesn't synthesize your specific uploads</td>
+            </tr>
+            <tr>
+              <td>ChatGPT / Claude.ai</td>
+              <td>Answers research questions</td>
+              <td>Halluccinates citations, no persistent library</td>
+            </tr>
+            <tr>
+              <td>NotebookLM</td>
+              <td>Chat over uploaded docs</td>
+              <td>
+                Not research-specific; no structured extraction; no brief output
+              </td>
+            </tr>
+            <tr>
+              <td>OpenAI Prism</td>
+              <td>LaTeX-native research writing</td>
+              <td>Assumes you already know what to write</td>
+            </tr>
+            <tr>
+              <td>Zotero / Mendeley</td>
+              <td>Citation management</td>
+              <td>No synthesis; no AI; no gap identification</td>
+            </tr>
+            <tr>
+              <td><strong>Primer</strong></td>
+              <td>
+                <strong>Conversational synthesis over your uploads</strong>
+              </td>
+              <td><strong>Doesn't discover papers or write prose</strong></td>
+            </tr>
+          </tbody>
+        </table>
+
+        <div class="callout amber">
+          <strong>Honest differentiation from NotebookLM:</strong> Google
+          NotebookLM is the closest surface-level competitor. The difference is
+          depth of research-specific features: structured paper card extraction,
+          relevance scoring, gap identification, citation-first grounding, and
+          CSV/BibTeX export. NotebookLM is a general document chat tool. Primer
+          is built for one workflow.
+        </div>
+      </div>
+
+      <!-- 02 PROBLEM -->
+      <div class="section" id="problem">
+        <h2>02 — Problem Statement</h2>
+
+        <h3>The problem in one sentence</h3>
+        <p>
+          Researchers doing literature reviews spend the majority of their
+          pre-writing time switching between disconnected tools, losing context
+          between sessions, and manually extracting information from papers
+          they've already read.
+        </p>
+
+        <h3>The four specific pain points Primer addresses</h3>
+
+        <h4>Pain 01 — Tool fragmentation</h4>
+        <p>
+          The average lit review involves 5–7 separate tools: a search tool
+          (Elicit), a reference manager (Zotero), a PDF reader (Preview or
+          Adobe), a notes tool (Notion or Obsidian), an AI chat (ChatGPT), a
+          writing tool (Google Docs or Word), and a citation formatter. Each
+          context switch costs cognitive overhead and lost state.
+        </p>
+
+        <h4>Pain 02 — No persistent research context</h4>
+        <p>
+          Every session in ChatGPT, Claude.ai, or any LLM chat starts from zero.
+          The researcher must re-explain their project, re-upload papers, and
+          rebuild context from scratch. Work done in yesterday's session is
+          inaccessible today.
+        </p>
+
+        <h4>Pain 03 — Hallucinated citations</h4>
+        <p>
+          General-purpose LLMs fabricate citations that sound plausible.
+          Researchers who catch this must verify every claim manually — which
+          defeats the purpose of using AI assistance. Those who don't catch it
+          face academic integrity risk.
+        </p>
+
+        <h4>Pain 04 — Manual paper extraction</h4>
+        <p>
+          Researchers maintain manual spreadsheets (like the one Primer was
+          built from) tracking methodology, results, datasets, and relevance
+          scores per paper. This is hours of work that could be automated if the
+          system read the actual PDF.
+        </p>
+
+        <div class="callout green">
+          <strong>Origin story:</strong> Primer was built because its founder
+          maintained a 20+ row spreadsheet tracking BDD100K and nuScenes
+          perception papers by hand — methodology, results, dataset, code links,
+          personal notes, relevance tier. That spreadsheet is the product's
+          north star. Every field in Primer's paper card maps directly to a
+          column in that spreadsheet.
+        </div>
+      </div>
+
+      <!-- 03 PERSONAS -->
+      <div class="section" id="personas">
+        <h2>03 — User Personas</h2>
+        <p>
+          Primer targets anyone doing a structured literature review — the task,
+          not the title. Three personas represent the full range, all equally
+          valid at launch.
+        </p>
+
+        <div class="persona-grid">
+          <div class="persona primary">
+            <div class="persona-name">The Graduate Researcher</div>
+            <div class="persona-role">Primary · PhD / Master's Student</div>
+            <div class="persona-detail">
+              <strong>Context:</strong> Writing a thesis or dissertation.
+              Literature review is 30–80 papers, must be exhaustive, will be
+              examined.
+            </div>
+            <div class="persona-detail">
+              <strong>Tools today:</strong> Zotero + Notion + ChatGPT + Elicit +
+              3 browser tabs.
+            </div>
+            <div class="persona-detail">
+              <strong>Budget:</strong> Personally paying. Price-sensitive.
+              $19/mo is 2 coffee shop sessions.
+            </div>
+            <div class="persona-pain">
+              "I spent 6 hours reading papers yesterday and can't remember which
+              one said what."
+            </div>
+          </div>
+
+          <div class="persona">
+            <div class="persona-name">The Academic Researcher</div>
+            <div class="persona-role">Secondary · Postdoc / Professor</div>
+            <div class="persona-detail">
+              <strong>Context:</strong> Writing grant proposals and journal
+              papers. Needs to rapidly survey a new subfield. Has less time, not
+              less rigor.
+            </div>
+            <div class="persona-detail">
+              <strong>Tools today:</strong> Same stack, more experience, equally
+              frustrated.
+            </div>
+            <div class="persona-detail">
+              <strong>Budget:</strong> May expense it. Cares more about time
+              saved than cost.
+            </div>
+            <div class="persona-pain">
+              "I need to understand the last 3 years of this field in a week
+              before the grant deadline."
+            </div>
+          </div>
+
+          <div class="persona">
+            <div class="persona-name">The Serious Student</div>
+            <div class="persona-role">
+              Tertiary · Advanced Undergrad / Master's
+            </div>
+            <div class="persona-detail">
+              <strong>Context:</strong> Research methods course, capstone
+              project, or honors thesis. First time doing a formal literature
+              review.
+            </div>
+            <div class="persona-detail">
+              <strong>Tools today:</strong> Google Scholar + ChatGPT + hope.
+            </div>
+            <div class="persona-detail">
+              <strong>Budget:</strong> Uses free tier. Upgrades when they get
+              serious.
+            </div>
+            <div class="persona-pain">
+              "I don't even know what a research gap is yet, let alone how to
+              find one."
+            </div>
+          </div>
+        </div>
+
+        <h3>Jobs to be done</h3>
+        <table class="feature-table">
+          <thead>
+            <tr>
+              <th>Job</th>
+              <th>Current solution</th>
+              <th>Primer's solution</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Make sense of 30+ papers</td>
+              <td>Read + highlight + manually take notes</td>
+              <td>Upload → paper cards auto-populated</td>
+            </tr>
+            <tr>
+              <td>Find the research gap</td>
+              <td>Read every paper, hope you spot it</td>
+              <td>Gap identification from literature coverage analysis</td>
+            </tr>
+            <tr>
+              <td>Remember what paper X said</td>
+              <td>Ctrl+F in Zotero or re-read the PDF</td>
+              <td>Ask Primer in natural language</td>
+            </tr>
+            <tr>
+              <td>Structure the lit review</td>
+              <td>Stare at blank page in Google Docs</td>
+              <td>Primer generates a structured outline</td>
+            </tr>
+            <tr>
+              <td>Track papers for future reference</td>
+              <td>Maintain a spreadsheet manually</td>
+              <td>Paper card library with export</td>
+            </tr>
+            <tr>
+              <td>Cite without fabricating</td>
+              <td>Manually copy DOIs and check every AI claim</td>
+              <td>Every Primer claim cites a real uploaded chunk</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- 04 CORE CONCEPT -->
+      <div class="section" id="core-concept">
+        <h2>04 — Core Concept</h2>
+
+        <h3>The mental model</h3>
+        <p>
+          Primer is a
+          <strong
+            >research assistant that only knows what you've given it.</strong
+          >
+          This constraint is not a limitation — it is the product's primary
+          trust mechanism. When Primer tells you something, it can only be from
+          a paper you uploaded. The citation is always real. The source always
+          exists. The page number always checks out.
+        </p>
+        <p>
+          The closest analogy: imagine you could hire a brilliant research
+          assistant, give them your entire paper stack, and ask them anything —
+          but they're not allowed to go to the internet or use any outside
+          knowledge. That assistant would be Primer.
+        </p>
+
+        <h3>The two output modes</h3>
+        <p>Every Primer project produces output in two complementary forms:</p>
+
+        <h4>Mode A — Paper Cards (structured extraction)</h4>
+        <p>
+          For each uploaded PDF, Primer extracts a structured card: title,
+          venue, methodology, key results, datasets, code availability, and a
+          relevance score against the user's research question. Cards are
+          displayed as a sortable table and exportable as CSV. This replaces the
+          manual spreadsheet.
+        </p>
+
+        <h4>Mode B — Conversational Brief (RAG chat)</h4>
+        <p>
+          The user chats with their paper library in natural language. Every
+          response is grounded — meaning every claim cites the specific paper
+          and page number it comes from. The conversation can produce a
+          structured brief (synthesis, debates, gaps, outline) or answer ad-hoc
+          questions ("what did Chen et al. say about anchor-free detection?").
+        </p>
+
+        <div class="callout">
+          <strong>Why chat, not just a one-shot brief?</strong> Research
+          questions evolve mid-review. A researcher might start asking about
+          "multi-task detection architectures" and realize mid-conversation that
+          the real gap is in "real-time embedded inference." One-shot briefs
+          force premature question commitment. Chat lets the research thinking
+          develop naturally — which is how it actually works.
+        </div>
+      </div>
+
+      <!-- 05 USER FLOWS -->
+      <div class="section" id="user-flows">
+        <h2>05 — User Flows</h2>
+
+        <h3>Primary flow — New project</h3>
+        <div class="flow">
+          <div class="flow-step">
+            <div class="flow-box highlight">Sign up</div>
+            <div class="flow-sub">Magic link email</div>
+          </div>
+          <div class="flow-arrow">→</div>
+          <div class="flow-step">
+            <div class="flow-box">Create project</div>
+            <div class="flow-sub">Name + research question</div>
+          </div>
+          <div class="flow-arrow">→</div>
+          <div class="flow-step">
+            <div class="flow-box">Upload PDFs</div>
+            <div class="flow-sub">Drag &amp; drop, up to 50</div>
+          </div>
+          <div class="flow-arrow">→</div>
+          <div class="flow-step">
+            <div class="flow-box new">Processing</div>
+            <div class="flow-sub">Cards + embeddings generated</div>
+          </div>
+          <div class="flow-arrow">→</div>
+          <div class="flow-step">
+            <div class="flow-box">Paper cards</div>
+            <div class="flow-sub">Review, sort, export</div>
+          </div>
+          <div class="flow-arrow">→</div>
+          <div class="flow-step">
+            <div class="flow-box highlight">Chat</div>
+            <div class="flow-sub">Ask anything, get cited answers</div>
+          </div>
+          <div class="flow-arrow">→</div>
+          <div class="flow-step">
+            <div class="flow-box new">Export brief</div>
+            <div class="flow-sub">Markdown or PDF</div>
+          </div>
+        </div>
+
+        <h3>Secondary flow — Returning user</h3>
+        <div class="flow">
+          <div class="flow-step">
+            <div class="flow-box">Log in</div>
+            <div class="flow-sub">Magic link</div>
+          </div>
+          <div class="flow-arrow">→</div>
+          <div class="flow-step">
+            <div class="flow-box highlight">Dashboard</div>
+            <div class="flow-sub">All projects visible</div>
+          </div>
+          <div class="flow-arrow">→</div>
+          <div class="flow-step">
+            <div class="flow-box">Open project</div>
+            <div class="flow-sub">Context fully restored</div>
+          </div>
+          <div class="flow-arrow">→</div>
+          <div class="flow-step">
+            <div class="flow-box">Continue chat</div>
+            <div class="flow-sub">Full history intact</div>
+          </div>
+        </div>
+
+        <h3>Processing states (critical for UX)</h3>
+        <table class="feature-table">
+          <thead>
+            <tr>
+              <th>State</th>
+              <th>What's happening</th>
+              <th>What user sees</th>
+              <th>Duration</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Uploading</td>
+              <td>File transfer to server</td>
+              <td>Upload progress bar per file</td>
+              <td>Seconds</td>
+            </tr>
+            <tr>
+              <td>Extracting</td>
+              <td>PyMuPDF parsing PDF text</td>
+              <td>"Reading [filename]..." with count</td>
+              <td>1–3s/paper</td>
+            </tr>
+            <tr>
+              <td>Building cards</td>
+              <td>Claude API structured extraction</td>
+              <td>Cards appear one by one as ready</td>
+              <td>5–15s/paper</td>
+            </tr>
+            <tr>
+              <td>Indexing</td>
+              <td>Chunking + embedding into ChromaDB</td>
+              <td>Progress bar, runs in parallel to cards</td>
+              <td>3–8s/paper</td>
+            </tr>
+            <tr>
+              <td>Ready</td>
+              <td>All processing complete</td>
+              <td>Card table populated, chat unlocked</td>
+              <td>—</td>
+            </tr>
+          </tbody>
+        </table>
+        <div class="callout amber">
+          <strong>Cards should stream in one-by-one</strong> as they're
+          extracted — not all-at-once after a long wait. Each card appearing is
+          a moment of perceived value. A user who watches 12 cards populate in
+          real time understands what Primer did; a user who waits 2 minutes and
+          sees a table appear may not.
+        </div>
+      </div>
+
+      <!-- 06 FEATURE REQUIREMENTS -->
+      <div class="section" id="features">
+        <h2>06 — Feature Requirements</h2>
+        <p>
+          All features are classified by priority. P1 = required for MVP launch.
+          P2 = required before first paying user. P3 = v2. Later = v3+.
+        </p>
+
+        <h3>Authentication &amp; Projects</h3>
+        <table class="feature-table">
+          <thead>
+            <tr>
+              <th>Feature</th>
+              <th>Priority</th>
+              <th>Description</th>
+              <th>Notes</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Magic link auth</td>
+              <td><span class="p1">P1</span></td>
+              <td>Email-based passwordless login via Supabase Auth</td>
+              <td>
+                No password management. Researchers use .edu emails — magic link
+                feels native to that context.
+              </td>
+            </tr>
+            <tr>
+              <td>Project creation</td>
+              <td><span class="p1">P1</span></td>
+              <td>Create named project with research question</td>
+              <td>
+                Research question is required. It scopes the card extraction
+                relevance scoring.
+              </td>
+            </tr>
+            <tr>
+              <td>Project dashboard</td>
+              <td><span class="p1">P1</span></td>
+              <td>
+                List of all user projects with last-active date and paper count
+              </td>
+              <td>Simple list view. No folders in MVP.</td>
+            </tr>
+            <tr>
+              <td>Update research question</td>
+              <td><span class="p2">P2</span></td>
+              <td>
+                Allow re-stating research question post-upload and re-scoring
+                cards
+              </td>
+              <td>
+                Triggers re-extraction of <code>synthesis_note</code> and
+                <code>relevance_score</code> for all cards.
+              </td>
+            </tr>
+            <tr>
+              <td>Project sharing</td>
+              <td><span class="later">Later</span></td>
+              <td>Share read-only project link with advisor or collaborator</td>
+              <td>Strong graduate student use case. Deferred.</td>
+            </tr>
+            <tr>
+              <td>Google OAuth</td>
+              <td><span class="later">Later</span></td>
+              <td>Sign in with Google as alternative</td>
+              <td>Magic link is sufficient for MVP.</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <h3>PDF Upload &amp; Ingestion</h3>
+        <table class="feature-table">
+          <thead>
+            <tr>
+              <th>Feature</th>
+              <th>Priority</th>
+              <th>Description</th>
+              <th>Notes</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Drag-and-drop upload</td>
+              <td><span class="p1">P1</span></td>
+              <td>Multi-file PDF drag-and-drop with progress per file</td>
+              <td>10 file limit on free, 50 on Pro.</td>
+            </tr>
+            <tr>
+              <td>Duplicate detection</td>
+              <td><span class="p1">P1</span></td>
+              <td>
+                Detect if same PDF is uploaded twice (filename + size hash)
+              </td>
+              <td>Warn user, don't double-index.</td>
+            </tr>
+            <tr>
+              <td>Upload status streaming</td>
+              <td><span class="p1">P1</span></td>
+              <td>Server-sent events showing per-paper processing state</td>
+              <td>
+                Cards stream in as they complete. Critical for perceived
+                performance.
+              </td>
+            </tr>
+            <tr>
+              <td>Add papers to existing project</td>
+              <td><span class="p2">P2</span></td>
+              <td>Upload additional PDFs to a project after initial upload</td>
+              <td>
+                New papers get cards and are indexed. Existing conversation
+                unaffected.
+              </td>
+            </tr>
+            <tr>
+              <td>Remove a paper</td>
+              <td><span class="p2">P2</span></td>
+              <td>
+                Delete a paper from the project (removes card and de-indexes
+                chunks)
+              </td>
+              <td>Useful when user uploads wrong version.</td>
+            </tr>
+            <tr>
+              <td>DOI / arXiv URL import</td>
+              <td><span class="later">Later</span></td>
+              <td>
+                Paste a DOI or arXiv link and Primer fetches the PDF
+                automatically
+              </td>
+              <td>High-value discovery feature. Deferred to v2.</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <h3>Paper Cards</h3>
+        <table class="feature-table">
+          <thead>
+            <tr>
+              <th>Feature</th>
+              <th>Priority</th>
+              <th>Description</th>
+              <th>Notes</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Auto-extraction on upload</td>
+              <td><span class="p1">P1</span></td>
+              <td>Claude extracts all card fields from PDF text</td>
+              <td>One Claude call per paper. Streams in as each completes.</td>
+            </tr>
+            <tr>
+              <td>Sortable card table</td>
+              <td><span class="p1">P1</span></td>
+              <td>Table view sortable by relevance, tier, venue, year</td>
+              <td>Default sort: relevance score descending.</td>
+            </tr>
+            <tr>
+              <td>Card detail view</td>
+              <td><span class="p1">P1</span></td>
+              <td>Click a card to see all extracted fields in a side panel</td>
+              <td>
+                Includes full synthesis note, limitations, and methodology.
+              </td>
+            </tr>
+            <tr>
+              <td>Manual field editing</td>
+              <td><span class="p2">P2</span></td>
+              <td>User can edit any extracted field inline</td>
+              <td>
+                AI won't always get it right. Especially important for results
+                and methodology fields.
+              </td>
+            </tr>
+            <tr>
+              <td>Filter by tier / score</td>
+              <td><span class="p2">P2</span></td>
+              <td>
+                Filter card table by relevance tier (1/2/3) or minimum score
+              </td>
+              <td>With 40+ papers this becomes essential.</td>
+            </tr>
+            <tr>
+              <td>CSV export</td>
+              <td><span class="p1">P1</span></td>
+              <td>
+                Export all cards as CSV matching standard spreadsheet format
+              </td>
+              <td>This is the killer demo moment. Must be in MVP.</td>
+            </tr>
+            <tr>
+              <td>BibTeX export</td>
+              <td><span class="p2">P2</span></td>
+              <td>Export references as .bib file for LaTeX use</td>
+              <td>
+                High-value for academic users. Requires DOI extraction from PDF.
+              </td>
+            </tr>
+          </tbody>
+        </table>
+
+        <h3>Chat Interface</h3>
+        <table class="feature-table">
+          <thead>
+            <tr>
+              <th>Feature</th>
+              <th>Priority</th>
+              <th>Description</th>
+              <th>Notes</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Grounded RAG chat</td>
+              <td><span class="p1">P1</span></td>
+              <td>
+                Natural language Q&A over uploaded papers with inline citations
+              </td>
+              <td>Every claim cites [filename, p.X]. Core product.</td>
+            </tr>
+            <tr>
+              <td>Conversation history</td>
+              <td><span class="p1">P1</span></td>
+              <td>
+                Full chat history persisted per project, accessible on return
+              </td>
+              <td>Stored in Supabase. Loaded on project open.</td>
+            </tr>
+            <tr>
+              <td>Generate brief command</td>
+              <td><span class="p1">P1</span></td>
+              <td>
+                Special command or button triggers structured brief generation
+              </td>
+              <td>
+                "Generate my research brief" → produces Synthesis + Debates +
+                Gaps + Outline as a single chat message.
+              </td>
+            </tr>
+            <tr>
+              <td>Source preview</td>
+              <td><span class="p2">P2</span></td>
+              <td>
+                Click a citation in chat to see the exact chunk highlighted in
+                context
+              </td>
+              <td>
+                The ultimate trust feature. Shows the actual text Primer
+                retrieved.
+              </td>
+            </tr>
+            <tr>
+              <td>Suggested prompts</td>
+              <td><span class="p2">P2</span></td>
+              <td>
+                Prompt chips shown to new users: "What are the key debates?",
+                "Where are the gaps?", "Compare methods X and Y"
+              </td>
+              <td>Reduces blank-page anxiety for first-time users.</td>
+            </tr>
+            <tr>
+              <td>Export chat as Markdown</td>
+              <td><span class="p2">P2</span></td>
+              <td>
+                Download full conversation or selected messages as .md file
+              </td>
+              <td>
+                Lets users take Primer's output into their writing tool of
+                choice.
+              </td>
+            </tr>
+            <tr>
+              <td>Multi-turn context window</td>
+              <td><span class="p1">P1</span></td>
+              <td>Send last N messages as context with each new API call</td>
+              <td>Last 10 turns. Balances context quality vs. token cost.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- 07 CHAT INTERFACE SPEC -->
+      <div class="section" id="chat">
+        <h2>07 — Chat Interface Specification</h2>
+
+        <h3>UI layout</h3>
+        <p>
+          Three-panel layout on desktop: left sidebar (projects), center panel
+          (chat), right panel (paper cards). On mobile: single column with tab
+          navigation between chat and cards.
+        </p>
+
+        <h3>Grounding behavior</h3>
+        <p>
+          Every AI response must follow this citation format: after each claim,
+          an inline citation appears as <tag>[Author et al., p.X]</tag>.
+          Citations are rendered as clickable chips. Clicking a chip opens the
+          source chunk in a side drawer showing the exact extracted text.
+        </p>
+
+        <h3>When Primer doesn't know</h3>
+        <p>
+          If the retrieval system finds no relevant chunks, Primer must respond:
+          <em
+            >"I don't see anything in your uploaded papers that addresses this.
+            You may want to search for additional literature on this topic."</em
+          >
+          It must never speculate beyond the provided literature. This is a hard
+          behavioral rule enforced by the system prompt, not a suggestion.
+        </p>
+
+        <h3>Sample interaction</h3>
+        <div class="chat-spec">
+          <div class="chat-header">
+            <div class="chat-header-title">
+              Project: AV Perception Survey · 18 papers indexed
+            </div>
+            <div class="chat-header-sub">
+              Grounded mode · Citations only from uploaded papers
+            </div>
+          </div>
+          <div class="chat-body">
+            <div class="chat-msg user">
+              What are the main architectural approaches to multi-task driving
+              perception, and where do they disagree?
+            </div>
+            <div class="chat-msg ai">
+              There are two dominant architectural philosophies in your uploaded
+              literature. The first uses a
+              <strong>shared encoder with task-specific decoder heads</strong> —
+              this approach is used by both YOLOP and HybridNets, which use a
+              single backbone to extract features then branch into separate
+              heads for detection, driveable area segmentation, and lane
+              detection.
+              <div class="chat-cite">
+                ↳ YOLOPX_2024.pdf, p.3 · HybridNets_2022.pdf, p.4
+              </div>
+              <br />
+              The key disagreement is around
+              <strong>anchor-based vs. anchor-free detection heads</strong>.
+              HybridNets uses anchor-based detection with k-means clustering for
+              prior boxes, while YOLOPX explicitly argues this is a limitation
+              and uses a decoupled anchor-free head from YOLOX for improved
+              flexibility.
+              <div class="chat-cite">
+                ↳ YOLOPX_2024.pdf, p.5 · HybridNets_2022.pdf, p.6
+              </div>
+              <br />
+              A secondary disagreement involves
+              <strong>training strategy</strong>: HybridNets uses a staged
+              multi-phase training to reduce compute, while YOLOPX uses SimOTA
+              label assignment and argues this achieves better performance
+              without multi-stage complexity.
+              <div class="chat-cite">↳ YOLOPX_2024.pdf, p.7</div>
+            </div>
+            <div class="chat-msg user">Generate my research brief</div>
+            <div class="chat-msg ai">
+              Generating your research brief from all 18 indexed papers...
+              <em
+                >(structured brief with Synthesis, Debates, Gaps, and Outline
+                sections will appear here)</em
+              >
+            </div>
+          </div>
+          <div class="chat-footer">
+            <div class="chat-input-mock">Ask anything about your papers...</div>
+            <button class="chat-send-mock">Send</button>
+          </div>
+        </div>
+
+        <h3>System prompt architecture</h3>
+        <p>The chat system prompt has three layers:</p>
+        <p>
+          <strong>Layer 1 — Role:</strong> "You are a research assistant. You
+          only have access to the source chunks provided to you. Your job is to
+          help the researcher understand, synthesize, and navigate their
+          literature."
+        </p>
+        <p>
+          <strong>Layer 2 — Grounding rule:</strong> "Every factual claim must
+          cite its source chunk as [Filename, p.X]. If you cannot support a
+          claim with a provided chunk, state that explicitly. Do not use outside
+          knowledge."
+        </p>
+        <p>
+          <strong>Layer 3 — Project context:</strong> "The user's research
+          question is: {research_question}. They have uploaded {n} papers.
+          Prioritize responses relevant to this research question."
+        </p>
+      </div>
+
+      <!-- 08 PAPER CARDS -->
+      <div class="section" id="paper-cards">
+        <h2>08 — Paper Card Specification</h2>
+
+        <h3>Extracted fields</h3>
+        <pre class="schema"><code class="language-typescript">interface PaperCard {
+  title:           string;          // Full paper title as written
+  authors:         string[];        // Author list, up to 5 then "et al."
+  venue:           string;          // Conference or journal name (e.g. CVPR, Pattern Recognition)
+  year:            number;          // Publication year as integer (e.g. 2024)
+  task:            string;          // Primary ML/research task
+  modality:        string;          // Camera, LiDAR, Camera+LiDAR, etc.
+  methodology:     string;          // 1–2 sentence core contribution
+  results:         string;          // Key metrics, copied verbatim from paper
+  datasets:        string[];        // All datasets used in experiments
+  pretraining:     string | null;   // Backbone/weight init, or null
+  code_available:  boolean;         // True if repo URL found in paper
+  code_url:        string | null;   // GitHub or project page URL
+  key_limitations: string | null;   // Limitations stated by authors
+  synthesis_note:  string;          // 2–3 sentences: relevance to research question
+  relevance_score: 1 | 2 | 3 | 4 | 5; // Scored against research question
+  tier:            1 | 2 | 3;       // 1=must-read, 2=should-read, 3=background
+  filename:        string;          // Original uploaded filename
+  session_id:      string;          // Project/session UUID
+  extracted_at:    string;          // ISO 8601 timestamp of extraction
+}</code></pre>
+
+        <h3>Relevance scoring rubric</h3>
+        <table class="feature-table">
+          <thead>
+            <tr>
+              <th>Score</th>
+              <th>Tier</th>
+              <th>Meaning</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>5</td>
+              <td>1</td>
+              <td>
+                Directly addresses the research question. Core methodology
+                overlap. Must-read.
+              </td>
+            </tr>
+            <tr>
+              <td>4</td>
+              <td>1</td>
+              <td>
+                Highly relevant. Significant overlap with question or
+                methodology. Must-read.
+              </td>
+            </tr>
+            <tr>
+              <td>3</td>
+              <td>2</td>
+              <td>
+                Relevant dataset, partial methodology overlap, or important
+                context. Should-read.
+              </td>
+            </tr>
+            <tr>
+              <td>2</td>
+              <td>3</td>
+              <td>
+                Loosely related. Background context. Useful for framing but not
+                core.
+              </td>
+            </tr>
+            <tr>
+              <td>1</td>
+              <td>3</td>
+              <td>
+                Minimal relevance to research question. Tangential at best.
+              </td>
+            </tr>
+          </tbody>
+        </table>
+
+        <div class="callout">
+          <strong>On extraction quality:</strong> Claude will not always get it
+          right, especially for methodology and results fields on complex
+          papers. The card is a starting point, not a replacement for reading.
+          The manual edit feature (P2) exists precisely because researchers need
+          to correct and enrich the auto-extracted content. Primer's value is
+          getting them 80% of the way there in 2 minutes, not 100% of the way in
+          20.
+        </div>
+      </div>
+
+      <!-- 09 RESEARCH BRIEF -->
+      <div class="section" id="brief">
+        <h2>09 — Research Brief Specification</h2>
+        <p>
+          The research brief is triggered by the user (via a button or by typing
+          "generate my research brief" in chat). It runs a fresh RAG retrieval
+          across all indexed papers with the research question, then produces a
+          structured document.
+        </p>
+
+        <h3>Brief structure</h3>
+        <table class="feature-table">
+          <thead>
+            <tr>
+              <th>Section</th>
+              <th>Content</th>
+              <th>Citation requirement</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Synthesis</td>
+              <td>
+                Thematic summary of what the literature collectively says about
+                the research question. Written as connected prose, not bullet
+                points.
+              </td>
+              <td>Every sentence cites at least one source</td>
+            </tr>
+            <tr>
+              <td>Key Debates &amp; Contradictions</td>
+              <td>Where sources disagree with each other. Both sides cited.</td>
+              <td>Both sides of each debate must be sourced</td>
+            </tr>
+            <tr>
+              <td>Research Gaps</td>
+              <td>
+                What the literature does NOT address relative to the research
+                question. Based only on absence of coverage in uploaded papers.
+              </td>
+              <td>
+                Must reference which papers were checked; cannot speculate
+              </td>
+            </tr>
+            <tr>
+              <td>Suggested Outline</td>
+              <td>
+                5–7 section outline for a literature review, organized by themes
+                found in synthesis.
+              </td>
+              <td>Each section maps to at least one source paper</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <h3>What the brief is NOT</h3>
+        <p>
+          The brief does not write the literature review. It produces the
+          scaffold. The prose in the Synthesis section is meant to show the
+          researcher what the argument looks like — not to be copy-pasted into
+          their paper. Primer's job ends at the outline. Prism, Word, and LaTeX
+          take it from there.
+        </p>
+      </div>
+
+      <!-- 10 EXPORTS -->
+      <div class="section" id="exports">
+        <h2>10 — Exports</h2>
+        <table class="feature-table">
+          <thead>
+            <tr>
+              <th>Export type</th>
+              <th>Priority</th>
+              <th>Format</th>
+              <th>Contents</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Paper cards CSV</td>
+              <td><span class="p1">P1</td>
+              <td>.csv</td>
+              <td>
+                All card fields as columns. One row per paper. Compatible with
+                Excel and Google Sheets. Column order mirrors the original
+                spreadsheet format that inspired Primer.
+              </td>
+            </tr>
+            <tr>
+              <td>Research brief (Markdown)</td>
+              <td><span class="p2">P2</span></td>
+              <td>.md</td>
+              <td>
+                Full structured brief with inline citations as Markdown
+                footnotes. Importable into Notion, Obsidian, and any Markdown
+                editor.
+              </td>
+            </tr>
+            <tr>
+              <td>Research brief (PDF)</td>
+              <td><span class="p3">P3</span></td>
+              <td>.pdf</td>
+              <td>
+                Rendered brief with Primer branding. Shareable with advisors.
+                Requires PDF generation on backend.
+              </td>
+            </tr>
+            <tr>
+              <td>Chat transcript</td>
+              <td><span class="p2">P2</span></td>
+              <td>.md</td>
+              <td>Full conversation history with citations preserved.</td>
+            </tr>
+            <tr>
+              <td>BibTeX file</td>
+              <td><span class="p2">P2</span></td>
+              <td>.bib</td>
+              <td>
+                Auto-generated references from paper card metadata. Requires DOI
+                extraction from PDFs. Essential for LaTeX users.
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- 11 ARCHITECTURE -->
+      <div class="section" id="architecture">
+        <h2>11 — Technical Architecture</h2>
+
+        <h3>System overview</h3>
+        <div class="flow flow--wrap">
+          <div class="flow-box">React frontend</div>
+          <div class="flow-arrow">→</div>
+          <div class="flow-box">FastAPI backend</div>
+          <div class="flow-arrow">→</div>
+          <div class="flow-box highlight">Pipeline A: Claude extraction</div>
+          <div class="flow-arrow flow-arrow--inline">+</div>
+          <div class="flow-box new">Pipeline B: ChromaDB RAG</div>
+          <div class="flow-arrow">→</div>
+          <div class="flow-box">Supabase (auth + storage)</div>
+        </div>
+
+        <h3>Component responsibilities</h3>
+        <table class="feature-table">
+          <thead>
+            <tr>
+              <th>Component</th>
+              <th>Technology</th>
+              <th>Responsibility</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Frontend</td>
+              <td>Vanilla HTML/JS (MVP) → React (v2)</td>
+              <td>Upload UI, card table, chat interface, export triggers</td>
+            </tr>
+            <tr>
+              <td>API server</td>
+              <td>FastAPI + Python 3.11+</td>
+              <td>All routes, file handling, pipeline orchestration</td>
+            </tr>
+            <tr>
+              <td>PDF parsing</td>
+              <td>PyMuPDF (fitz)</td>
+              <td>
+                Text extraction with page metadata. Returns full_text + page
+                list.
+              </td>
+            </tr>
+            <tr>
+              <td>Card extraction</td>
+              <td>Claude API (claude-sonnet-4-5)</td>
+              <td>Structured JSON extraction per paper. One call per PDF.</td>
+            </tr>
+            <tr>
+              <td>Chunking</td>
+              <td>Custom (800 token chunks, 100 overlap)</td>
+              <td>
+                Splits page text into retrievable chunks with source metadata
+              </td>
+            </tr>
+            <tr>
+              <td>Embeddings</td>
+              <td>sentence-transformers (all-MiniLM-L6-v2)</td>
+              <td>Local embedding model. Free, fast, good enough for MVP.</td>
+            </tr>
+            <tr>
+              <td>Vector store</td>
+              <td>ChromaDB (persistent local)</td>
+              <td>Semantic search over chunks. Session-scoped collections.</td>
+            </tr>
+            <tr>
+              <td>Chat synthesis</td>
+              <td>Claude API (claude-sonnet-4-5)</td>
+              <td>RAG-grounded chat responses with citation enforcement</td>
+            </tr>
+            <tr>
+              <td>Auth</td>
+              <td>Supabase Auth (magic link)</td>
+              <td>User identity, session tokens</td>
+            </tr>
+            <tr>
+              <td>Database</td>
+              <td>Supabase (Postgres)</td>
+              <td>Users, projects, cards, chat history</td>
+            </tr>
+            <tr>
+              <td>File storage</td>
+              <td>Supabase Storage (MVP) → S3 (scale)</td>
+              <td>PDF persistence per user/project</td>
+            </tr>
+            <tr>
+              <td>Deployment</td>
+              <td>Railway</td>
+              <td>Single-command deploy, FastAPI native, free tier viable</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <h3>Scalability considerations</h3>
+        <p>
+          The MVP architecture is deliberately local-first — ChromaDB persists
+          to disk, PDFs live in the filesystem, card JSONs are flat files. This
+          is intentional: it ships fast and costs nothing to run. The path to
+          scale is clear: ChromaDB → Pinecone or pgvector, local files → S3,
+          card JSONs → Supabase table. None of these migrations break the API
+          contract.
+        </p>
+      </div>
+
+      <!-- 12 DATA MODEL -->
+      <div class="section" id="data-model">
+        <h2>12 — Data Model</h2>
+        <pre class="schema"><code class="language-sql">-- Supabase (Postgres) schema
+-- ─────────────────────────────────────────────────────────────────────────
+
+-- ─── users ───────────────────────────────────────────────────────────────
+CREATE TABLE users (
+  id          uuid        PRIMARY KEY,
+  email       text        UNIQUE,
+  created_at  timestamptz,
+  user_plan        text        DEFAULT 'free'   -- 'free' | 'pro'
+);
+
+-- ─── projects ────────────────────────────────────────────────────────────
+CREATE TABLE projects (
+  id                uuid        PRIMARY KEY,
+  user_id           uuid        REFERENCES users(id),
+  name              text,
+  research_question text        NOT NULL,
+  paper_count       int         DEFAULT 0,
+  created_at        timestamptz,
+  updated_at        timestamptz
+);
+
+-- ─── papers ──────────────────────────────────────────────────────────────
+CREATE TABLE papers (
+  id              uuid        PRIMARY KEY,
+  project_id      uuid        REFERENCES projects(id),
+  filename        text,
+  storage_path    text,           -- Supabase Storage path
+  page_count      int,
+  chunk_count     int,
+  card_json       jsonb,          -- full extracted card
+  relevance_score int,            -- 1–5, denormalized for fast sort
+  tier            int,            -- 1=must-read, 2=should-read, 3=background
+  uploaded_at     timestamptz,
+  processed_at    timestamptz
+);
+
+-- ─── messages ────────────────────────────────────────────────────────────
+CREATE TABLE messages (
+  id          uuid        PRIMARY KEY,
+  project_id  uuid        REFERENCES projects(id),
+  role        text,               -- 'user' | 'assistant'
+  content     text,
+  citations   jsonb,              -- [{ filename, page, chunk_text }]
+  created_at  timestamptz
+);
+
+-- ─── chroma_collections ──────────────────────────────────────────────────
+CREATE TABLE chroma_collections (
+  project_id       uuid        REFERENCES projects(id),
+  collection_name  text,           -- ChromaDB collection ID
+  chunk_count      int,
+  last_indexed     timestamptz
+);</code></pre>
+      </div>
+
+      <!-- 13 GROUNDING SYSTEM -->
+      <div class="section" id="grounding">
+        <h2>13 — Grounding System</h2>
+        <p>
+          Citation grounding is Primer's primary trust differentiator. This
+          section defines the exact enforcement mechanism.
+        </p>
+
+        <h3>The grounding contract</h3>
+        <p>
+          Primer makes one unconditional promise:
+          <strong
+            >every factual claim in a Primer response cites the specific paper
+            and page number it came from.</strong
+          >
+          If Primer cannot support a claim with a real retrieved chunk, it must
+          say so. This is enforced at the prompt level, not the hope level.
+        </p>
+
+        <h3>How it works mechanically</h3>
+        <ol class="grounding-steps">
+          <li>User sends a message to the chat interface.</li>
+          <li>
+            The message is embedded and used to retrieve the top 15 most
+            semantically relevant chunks from the project's ChromaDB collection.
+          </li>
+          <li>
+            Retrieved chunks are formatted with their source metadata (filename
+            + page number) and injected into the Claude API prompt.
+          </li>
+          <li>
+            The system prompt instructs Claude to cite every claim using
+            <tag>[Filename, p.X]</tag> format, and to explicitly say "not
+            addressed in the provided literature" for any question the chunks
+            don't answer.
+          </li>
+          <li>
+            Claude's response is parsed to extract citation references and
+            validate they match the retrieved chunk metadata before being
+            returned to the user.
+          </li>
+        </ol>
+
+        <h3>Failure modes and mitigations</h3>
+        <table class="risk-table">
+          <thead>
+            <tr>
+              <th>Failure mode</th>
+              <th>Likelihood</th>
+              <th>Mitigation</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Claude cites a real filename but wrong page number</td>
+              <td><span class="risk-med">MED</span></td>
+              <td>
+                Validate cited page numbers against retrieved chunk metadata
+                before returning response. Flag mismatches.
+              </td>
+            </tr>
+            <tr>
+              <td>
+                Claude paraphrases a chunk loosely and attribution is unclear
+              </td>
+              <td><span class="risk-med">MED</span></td>
+              <td>
+                Prompt instructs Claude to quote key phrases verbatim when
+                citing, not just paraphrase. Source preview feature lets user
+                verify.
+              </td>
+            </tr>
+            <tr>
+              <td>Retrieved chunks are irrelevant (poor embedding quality)</td>
+              <td><span class="risk-low">LOW</span></td>
+              <td>
+                all-MiniLM-L6-v2 is well-tested for semantic similarity.
+                Increase n_results to 20 for complex questions.
+              </td>
+            </tr>
+            <tr>
+              <td>
+                User asks a question with no relevant chunks in their library
+              </td>
+              <td><span class="risk-low">LOW</span></td>
+              <td>
+                Primer must respond with "I don't see this addressed in your
+                uploaded papers." Hard rule in system prompt.
+              </td>
+            </tr>
+            <tr>
+              <td>Scanned PDF produces garbled text from OCR</td>
+              <td><span class="risk-med">MED</span></td>
+              <td>
+                Detect low text-per-page ratio after extraction. Warn user:
+                "This paper may be scanned — extraction quality may be low."
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- 14 PRICING -->
+      <div class="section" id="pricing">
+        <h2>14 — Pricing Model</h2>
+
+        <table class="feature-table">
+          <thead>
+            <tr>
+              <th>Feature</th>
+              <th>Free</th>
+              <th>Pro ($19/mo)</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Projects</td>
+              <td>3 total</td>
+              <td>Unlimited</td>
+            </tr>
+            <tr>
+              <td>PDFs per project</td>
+              <td>10</td>
+              <td>50</td>
+            </tr>
+            <tr>
+              <td>Research briefs</td>
+              <td>3/month</td>
+              <td>Unlimited</td>
+            </tr>
+            <tr>
+              <td>Chat messages</td>
+              <td>30/month</td>
+              <td>Unlimited</td>
+            </tr>
+            <tr>
+              <td>Paper cards</td>
+              <td>Included</td>
+              <td>Included</td>
+            </tr>
+            <tr>
+              <td>CSV export</td>
+              <td>Included</td>
+              <td>Included</td>
+            </tr>
+            <tr>
+              <td>BibTeX export</td>
+              <td>—</td>
+              <td>Included</td>
+            </tr>
+            <tr>
+              <td>Chat history persistence</td>
+              <td>7 days</td>
+              <td>Permanent</td>
+            </tr>
+            <tr>
+              <td>Priority processing</td>
+              <td>—</td>
+              <td>Included</td>
+            </tr>
+            <tr>
+              <td>Early waitlist Pro offer</td>
+              <td>—</td>
+              <td>3 months free</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <h3>Unit economics</h3>
+        <div class="metrics-grid metrics-grid--3col">
+          <div class="metric-box">
+            <div class="metric-num">53</div>
+            <div class="metric-label">Pro users for $1K MRR</div>
+          </div>
+          <div class="metric-box">
+            <!-- <div class="metric-num">~$<span class="ri">0</span>.40</div> -->
+            <div class="metric-num">~$0.40</div>
+            <div class="metric-label">Estimated API cost per brief</div>
+          </div>
+          <div class="metric-box">
+            <!-- <div class="metric-num">$<span class="ri">19</span></div> -->
+            <div class="metric-num">$19</div>
+            <div class="metric-label">2 coffee shop sessions</div>
+          </div>
+        </div>
+
+        <div class="callout amber">
+          <strong>On the free tier chat limit:</strong> 30 messages/month is
+          deliberately generous enough to demonstrate value but restrictive
+          enough to create upgrade pressure. A researcher mid-dissertation who
+          hits that limit on the 25th of the month will upgrade. That's the
+          conversion moment.
+        </div>
+      </div>
+
+      <!-- 15 METRICS -->
+      <div class="section" id="metrics">
+        <h2>15 — Success Metrics</h2>
+
+        <h3>Launch definition of success</h3>
+        <div class="callout green">
+          <strong>Primary:</strong> One researcher shares Primer with another
+          researcher without being asked. This is the signal that the product
+          created enough value to earn unsolicited word-of-mouth. Everything
+          else is secondary.
+        </div>
+
+        <h3>Metrics by phase</h3>
+        <table class="feature-table">
+          <thead>
+            <tr>
+              <th>Phase</th>
+              <th>Metric</th>
+              <th>Target</th>
+              <th>Why it matters</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Week 1 (launch)</td>
+              <td>Waitlist signups from landing page</td>
+              <td>50</td>
+              <td>Validates message resonance before product is polished</td>
+            </tr>
+            <tr>
+              <td>Week 2</td>
+              <td>Users who upload ≥5 papers and run a brief</td>
+              <td>10</td>
+              <td>Measures core loop completion, not just signups</td>
+            </tr>
+            <tr>
+              <td>Month 1</td>
+              <td>CSV exports</td>
+              <td>25</td>
+              <td>Export = user got real value, took it somewhere else</td>
+            </tr>
+            <tr>
+              <td>Month 1</td>
+              <td>Organic referrals (tracked via referral param)</td>
+              <td>5</td>
+              <td>The primary success signal</td>
+            </tr>
+            <tr>
+              <td>Month 2</td>
+              <td>First paying Pro user</td>
+              <td>1</td>
+              <td>Proof of willingness to pay</td>
+            </tr>
+            <tr>
+              <td>Month 3</td>
+              <td>MRR</td>
+              <td>$200</td>
+              <td>Early but meaningful revenue signal</td>
+            </tr>
+            <tr>
+              <td>Month 6</td>
+              <td>MRR</td>
+              <td>$1,000</td>
+              <td>53 Pro users. Business is real.</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <h3>Anti-metrics (things that don't matter yet)</h3>
+        <p>
+          Page views, time-on-site, email open rates, Twitter/X followers. These
+          are vanity metrics at this stage. A researcher who uploads 40 papers,
+          exports a CSV, and never comes back to the website has gotten more
+          value from Primer than 1,000 people who read the landing page.
+        </p>
+      </div>
+
+      <!-- 16 ROADMAP -->
+      <div class="section" id="roadmap">
+        <h2>16 — Roadmap</h2>
+
+        <div class="roadmap">
+          <div class="phase">
+            <div class="phase-header mvp">
+              MVP — Ship it
+              <div class="phase-timeline">5 days</div>
+            </div>
+            <div class="phase-body">
+              <div class="phase-item">Magic link auth (Supabase)</div>
+              <div class="phase-item">PDF upload + ingestion</div>
+              <div class="phase-item">Paper card auto-extraction</div>
+              <div class="phase-item">Sortable card table</div>
+              <div class="phase-item">CSV export</div>
+              <div class="phase-item">Grounded RAG chat</div>
+              <div class="phase-item">Chat history persistence</div>
+              <div class="phase-item">Generate brief command</div>
+              <div class="phase-item">Deploy to Railway</div>
+              <div class="phase-item">Waitlist → login link</div>
+            </div>
+          </div>
+
+          <div class="phase">
+            <div class="phase-header v2">
+              v2 — First $
+              <div class="phase-timeline">Weeks 3–6</div>
+            </div>
+            <div class="phase-body">
+              <div class="phase-item">Stripe integration</div>
+              <div class="phase-item">Free/Pro enforcement</div>
+              <div class="phase-item">Manual card editing</div>
+              <div class="phase-item">Source preview on citations</div>
+              <div class="phase-item">Markdown brief export</div>
+              <div class="phase-item">BibTeX export</div>
+              <div class="phase-item">Add papers to existing project</div>
+              <div class="phase-item">Suggested chat prompts</div>
+              <div class="phase-item">Update research question</div>
+              <div class="phase-item">React frontend migration</div>
+            </div>
+          </div>
+
+          <div class="phase">
+            <div class="phase-header v3">
+              v3 — Scale
+              <div class="phase-timeline">Month 3+</div>
+            </div>
+            <div class="phase-body">
+              <div class="phase-item">DOI / arXiv URL import</div>
+              <div class="phase-item">Project sharing (read-only)</div>
+              <div class="phase-item">PDF brief export</div>
+              <div class="phase-item">Notion / Google Docs export</div>
+              <div class="phase-item">Multi-project dashboard</div>
+              <div class="phase-item">Paper recommendations</div>
+              <div class="phase-item">Team / lab accounts</div>
+              <div class="phase-item">Mobile responsive UI</div>
+              <div class="phase-item">Google OAuth</div>
+              <div class="phase-item">Enterprise pilot</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 17 RISKS -->
+      <div class="section" id="risks">
+        <h2>17 — Risks &amp; Mitigations</h2>
+
+        <table class="risk-table">
+          <thead>
+            <tr>
+              <th>Risk</th>
+              <th>Severity</th>
+              <th>Likelihood</th>
+              <th>Mitigation</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>
+                <strong
+                  >Google NotebookLM adds research-specific features</strong
+                ><br />They have unlimited resources and are already in adjacent
+                territory.
+              </td>
+              <td><span class="risk-high">HIGH</span></td>
+              <td><span class="risk-med">MED</span></td>
+              <td>
+                Move fast. Win researchers before Google builds for them. Niche
+                depth (BibTeX, card schema, gap identification) is harder to
+                replicate than general chat.
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <strong
+                  >Claude API pricing makes unit economics unworkable</strong
+                ><br />Extraction + synthesis calls add up at scale.
+              </td>
+              <td><span class="risk-med">MED</span></td>
+              <td><span class="risk-low">LOW</span></td>
+              <td>
+                Estimated $0.30–0.50 per brief at current pricing with 15 chunks
+                retrieved. At $19/mo and 2–3 briefs per user per month, margins
+                are healthy. Monitor and adjust free tier limits.
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <strong>PDF text extraction fails on scanned papers</strong
+                ><br />Many older academic papers are image-only PDFs.
+              </td>
+              <td><span class="risk-med">MED</span></td>
+              <td><span class="risk-med">MED</span></td>
+              <td>
+                Detect low text-per-page ratio and warn user. Add OCR
+                (pytesseract) in v2 for scanned PDFs. Flag this clearly rather
+                than silently producing bad output.
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <strong
+                  >User uploads copyrighted PDFs, creating liability</strong
+                ><br />Terms of service must be explicit that users must have
+                rights to uploaded content.
+              </td>
+              <td><span class="risk-high">HIGH</span></td>
+              <td><span class="risk-med">MED</span></td>
+              <td>
+                Clear ToS requiring user rights. PDFs stored privately per user,
+                never shared. No training on uploaded content. Consult an
+                attorney before v2 launch.
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <strong>Extraction quality is too low for non-CS papers</strong
+                ><br />The card schema is tuned for ML papers. History,
+                economics, humanities PDFs are structurally different.
+              </td>
+              <td><span class="risk-low">LOW</span></td>
+              <td><span class="risk-med">MED</span></td>
+              <td>
+                MVP targets STEM researchers — the schema fits. For v2, consider
+                domain-specific extraction prompts. Collect field distribution
+                from early users.
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <strong>Solo founder bandwidth</strong><br />5 days to MVP while
+                in grad school and working in xDI lab.
+              </td>
+              <td><span class="risk-med">MED</span></td>
+              <td><span class="risk-high">HIGH</span></td>
+              <td>
+                Scope is deliberately minimal. Vanilla JS frontend. No auth in
+                day 1. Ship ugly. The product's value is in the AI pipeline, not
+                the CSS.
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- 18 NON-GOALS -->
+      <div class="section" id="nongoals">
+        <h2>18 — Non-Goals</h2>
+        <p>
+          These are explicitly out of scope for MVP and v2. Saying no to these
+          is how Primer ships.
+        </p>
+
+        <ul class="nongoal-list">
+          <li>
+            <strong>Paper discovery.</strong> Primer does not search for papers.
+            Users bring their own. Discovery is Elicit's job.
+          </li>
+          <li>
+            <strong>Prose writing assistance.</strong> Primer produces outlines
+            and briefs, not finished prose. Writing is Prism's and Jenni's job.
+          </li>
+          <li>
+            <strong>Real-time collaboration.</strong> No live co-editing. No
+            multiplayer. One researcher per project in MVP.
+          </li>
+          <li>
+            <strong>Mobile app.</strong> Web-responsive only. A native iOS or
+            Android app is a v3+ consideration.
+          </li>
+          <li>
+            <strong>LaTeX integration.</strong> Primer is tool-agnostic for
+            writing. BibTeX export covers the most important LaTeX need.
+          </li>
+          <li>
+            <strong>Training on user data.</strong> Uploaded PDFs are processed
+            and stored per-user. They are never used to train or fine-tune any
+            model. This is a permanent policy, not a temporary one.
+          </li>
+          <li>
+            <strong>Reference management (Zotero replacement).</strong> Primer
+            extracts metadata but is not a full citation manager. Deep
+            integration with Zotero is a later consideration.
+          </li>
+          <li>
+            <strong>General-purpose document chat.</strong> Primer is for
+            academic research papers. It is not a general "chat with your PDFs"
+            tool. This focus is the product.
+          </li>
+        </ul>
+      </div>
+
+      <!-- 19 OPEN QUESTIONS -->
+      <div class="section" id="open-questions">
+        <h2>19 — Open Questions</h2>
+        <ol class="oq-list">
+          <li>
+            <strong
+              >How should Primer handle papers where full text extraction
+              produces garbage?</strong
+            >
+            (Scanned PDFs, papers with complex multi-column layouts, papers with
+            mostly figures.)
+            <div class="oq-note">
+              Current plan: warn user, extract what we can, flag the card as
+              "low confidence." OCR as v2 feature.
+            </div>
+          </li>
+          <li>
+            <strong
+              >Should the research question be editable after papers are
+              uploaded?</strong
+            >
+            <div class="oq-note">
+              Yes (P2 feature) — triggers re-scoring of all cards. But this
+              costs API calls. Should it be gated to Pro?
+            </div>
+          </li>
+          <li>
+            <strong>What is the right chunk size for academic papers?</strong>
+            <div class="oq-note">
+              Currently specced at 800 tokens with 100 overlap. Academic papers
+              have dense, technical paragraphs. May need to be larger (1200)
+              than typical RAG defaults. Needs empirical testing on real papers.
+            </div>
+          </li>
+          <li>
+            <strong
+              >How do we handle papers in languages other than English?</strong
+            >
+            <div class="oq-note">
+              Not addressed in MVP. Claude handles multilingual text — but the
+              extraction prompt and card schema are English-optimized. Flag as
+              known limitation.
+            </div>
+          </li>
+          <li>
+            <strong
+              >When does a free user get notified they're approaching
+              limits?</strong
+            >
+            <div class="oq-note">
+              At 80% of limit (e.g., 24/30 chat messages used). Gives them a
+              meaningful warning without immediately cutting them off. Converts
+              anxiety into upgrade consideration.
+            </div>
+          </li>
+          <li>
+            <strong
+              >Should Primer offer a "team" or "lab" plan for research
+              groups?</strong
+            >
+            <div class="oq-note">
+              Strong long-term signal. A PI who puts their whole lab on Primer
+              at $49/month/lab is a more durable customer than individual Pro
+              users. Deferred to v3 but worth early conversations with
+              professors.
+            </div>
+          </li>
+        </ol>
+      </div>
+
+      <!-- 20 ASSUMPTIONS LOG -->
+      <div class="section" id="assumptions">
+        <h2>20 — Assumptions Log</h2>
+        <p>
+          Decisions made without explicit founder confirmation. These should be
+          revisited before v2 launch.
+        </p>
+
+        <table class="feature-table">
+          <thead>
+            <tr>
+              <th>Assumption</th>
+              <th>Decision made</th>
+              <th>Rationale</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Auth method <span class="assumption">assumed</span></td>
+              <td>Magic link via Supabase Auth</td>
+              <td>
+                Lowest friction for academic email users. No password
+                management. Supabase provides this out-of-the-box. Revisit if
+                conversion from landing page to signup is low.
+              </td>
+            </tr>
+            <tr>
+              <td>
+                When research question is entered
+                <span class="assumption">assumed</span>
+              </td>
+              <td>Required at project creation, before upload</td>
+              <td>
+                Scopes the card extraction relevance scoring from the start.
+                Without it, all papers score against a null question and
+                extraction quality degrades significantly.
+              </td>
+            </tr>
+            <tr>
+              <td>Export formats <span class="assumption">assumed</span></td>
+              <td>CSV (P1), Markdown brief + BibTeX (P2), PDF brief (P3)</td>
+              <td>
+                CSV was confirmed as killer feature. Markdown covers
+                Notion/Obsidian users. BibTeX covers LaTeX users. PDF brief
+                deferred as it requires backend rendering complexity.
+              </td>
+            </tr>
+            <tr>
+              <td>
+                Launch success definition
+                <span class="assumption">assumed</span>
+              </td>
+              <td>
+                First organic share (researcher shares with another researcher
+                unprompted)
+              </td>
+              <td>
+                Strongest signal of genuine value. Vanity metrics (signups,
+                views) are meaningless at this stage.
+              </td>
+            </tr>
+            <tr>
+              <td>
+                Free tier chat limit <span class="assumption">assumed</span>
+              </td>
+              <td>30 messages/month</td>
+              <td>
+                Generous enough to demonstrate full value across one or two lit
+                review sessions. Tight enough to create upgrade pressure for
+                active users.
+              </td>
+            </tr>
+            <tr>
+              <td>Chunk size <span class="assumption">assumed</span></td>
+              <td>800 tokens, 100 overlap</td>
+              <td>
+                Academic papers have denser paragraphs than typical RAG use
+                cases. May need to increase to 1200. Requires empirical testing
+                — do not change without testing on real papers.
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="doc-footer">
+        <div class="doc-footer__wordmark">
+          P<span class="ri">ri</span>mer —
+          PRD v1.0 · February 2026
+        </div>
+      </div>
+    </main>
+
+    <script>
+      // Sidebar active state on scroll
+      const sections = document.querySelectorAll("[id]");
+      const links = document.querySelectorAll(".s-link");
+      const obs = new IntersectionObserver(
+        (entries) => {
+          entries.forEach((e) => {
+            if (e.isIntersecting) {
+              links.forEach((l) => l.classList.remove("active"));
+              const active = document.querySelector(
+                `.s-link[href="#${e.target.id}"]`,
+              );
+              if (active) active.classList.add("active");
+            }
+          });
+        },
+        { threshold: 0.3, rootMargin: "-20% 0px -60% 0px" },
+      );
+      sections.forEach((s) => obs.observe(s));
+    </script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-sql.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-typescript.min.js"></script>
+    <script>
+      // Add PostgreSQL-specific types not included in Prism's generic SQL grammar
+      Prism.languages.insertBefore('sql', 'keyword', {
+        'pg-type': /\b(?:uuid|timestamptz|jsonb)\b/i
+      });
+    </script>
+  </body>
+</html>

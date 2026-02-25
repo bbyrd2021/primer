@@ -1,0 +1,27 @@
+# Secrets
+.env
+
+# Runtime data
+uploads/
+chroma_db/
+cards_db/
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+.mypy_cache/
+.ruff_cache/
+.pytest_cache/
+.venv/
+dist/
+*.egg-info/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Editor
+.vscode/
+.idea/
+*.swp
