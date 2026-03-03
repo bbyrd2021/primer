@@ -1,16 +1,11 @@
 # core/extract.py
 import json
 import logging
-import os
 from pathlib import Path
 
-import anthropic
-from dotenv import load_dotenv
-
+from core.llm import BRIEF_MAX_TOKENS, complete
 from core.prompts import EXTRACTION_PROMPT
 from models.paper import PaperCard
-
-load_dotenv()
 
 logger = logging.getLogger(__name__)
 
@@ -21,9 +16,6 @@ CARDS_DIR.mkdir(exist_ok=True)
 MAX_PAPER_TEXT_CHARS: int = 60_000
 FRONT_CHARS: int = 40_000
 BACK_CHARS: int = 20_000
-
-# Initialize Claude client once at module level
-client = anthropic.Anthropic(api_key=os.getenv("ANTHROPIC_API_KEY"))
 
 
 def _truncate_paper_text(text: str) -> str:
@@ -44,6 +36,7 @@ def extract_paper_card(
     filename: str,
     research_question: str,
     session_id: str,
+    api_key: str = "",
 ) -> PaperCard:
     """Extract a structured card from a single paper via Claude API.
 
@@ -68,13 +61,12 @@ def extract_paper_card(
         paper_text=truncated_text,
     )
 
-    message = client.messages.create(
-        model="claude-sonnet-4-5",
-        max_tokens=1500,
+    raw = complete(
         messages=[{"role": "user", "content": prompt}],
-    )
-
-    raw = message.content[0].text.strip()
+        system="You are a research paper analysis assistant. Output ONLY valid JSON — no markdown, no preamble, no explanation.",
+        api_key=api_key,
+        max_tokens=BRIEF_MAX_TOKENS,
+    ).strip()
 
     # Strip markdown code fences if Claude adds them despite instructions
     if raw.startswith("```"):

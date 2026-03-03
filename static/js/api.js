@@ -3,6 +3,17 @@
 
 const API_BASE = "/api";
 
+// API Key management — lives in sessionStorage for the browser tab only
+export const apiKey = {
+  get: () => sessionStorage.getItem("primer_llm_key") || "",
+  set: (key) => sessionStorage.setItem("primer_llm_key", key),
+  clear: () => sessionStorage.removeItem("primer_llm_key"),
+  isSet: () => {
+    const k = sessionStorage.getItem("primer_llm_key");
+    return !!k && (k.startsWith("sk-ant-") || k.startsWith("sk-"));
+  },
+};
+
 export class APIError extends Error {
   constructor(message, status) {
     super(message);
@@ -23,9 +34,13 @@ async function handleResponse(response) {
 
 export const api = {
   uploadPapers: (formData) =>
-    fetch(`${API_BASE}/upload`, { method: "POST", body: formData }).then(
-      handleResponse,
-    ),
+    fetch(`${API_BASE}/upload`, {
+      method: "POST",
+      headers: {
+        "X-LLM-Key": apiKey.get(),
+      },
+      body: formData,
+    }).then(handleResponse),
 
   getCards: (sessionId) =>
     fetch(`${API_BASE}/cards/${encodeURIComponent(sessionId)}`).then(
@@ -35,7 +50,10 @@ export const api = {
   sendChat: (request) =>
     fetch(`${API_BASE}/chat`, {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: {
+        "Content-Type": "application/json",
+        "X-LLM-Key": apiKey.get(),
+      },
       body: JSON.stringify(request),
     }).then(handleResponse),
 
@@ -48,7 +66,10 @@ export const api = {
   async streamChat(request, onChunk) {
     const response = await fetch(`${API_BASE}/chat/stream`, {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: {
+        "Content-Type": "application/json",
+        "X-LLM-Key": apiKey.get(),
+      },
       body: JSON.stringify(request),
     });
 

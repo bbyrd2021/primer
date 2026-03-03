@@ -2,20 +2,14 @@
 import asyncio
 import json
 import logging
-import os
 from typing import AsyncIterator
 
-import anthropic
-
 from core.embeddings import retrieve
+from core.llm import BRIEF_MAX_TOKENS, MAX_TOKENS, complete, stream_complete
 from core.prompts import BRIEF_PROMPT, CHAT_SYSTEM_PROMPT, format_chunks
 from models.message import ChatResponse
 
 logger = logging.getLogger(__name__)
-
-# Initialize Claude clients once at module level
-client = anthropic.Anthropic(api_key=os.getenv("ANTHROPIC_API_KEY"))
-async_client = anthropic.AsyncAnthropic(api_key=os.getenv("ANTHROPIC_API_KEY"))
 
 # How many recent turns to include as conversation context
 CHAT_HISTORY_TURNS: int = 10
@@ -27,10 +21,11 @@ def chat(
     research_question: str,
     paper_count: int,
     history: list[dict],
+    api_key: str = "",
 ) -> ChatResponse:
     """Generate a grounded chat response using RAG.
 
-    Retrieves relevant chunks for the message, then calls Claude with a
+    Retrieves relevant chunks for the message, then calls the LLM with a
     strict grounding system prompt. Every claim in the response must cite
     a real source chunk.
 
@@ -40,6 +35,7 @@ def chat(
         research_question: Project research question for system prompt context.
         paper_count: Number of indexed papers for system prompt context.
         history: Recent chat history as list of {role, content} dicts.
+        api_key: User-supplied API key.
 
     Returns:
         ChatResponse with response text and sources used.
@@ -74,15 +70,14 @@ def chat(
         ),
     })
 
-    response = client.messages.create(
-        model="claude-sonnet-4-5",
-        max_tokens=2000,
-        system=system_prompt,
+    text = complete(
         messages=messages,
+        system=system_prompt,
+        api_key=api_key,
     )
 
     return ChatResponse(
-        content=response.content[0].text,
+        content=text,
         sources=list({c["source"] for c in chunks}),
         chunks_retrieved=len(chunks),
     )
@@ -91,6 +86,7 @@ def chat(
 def generate_brief(
     research_question: str,
     session_id: str,
+    api_key: str = "",
 ) -> ChatResponse:
     """Generate a full structured research brief using all indexed papers.
 
@@ -100,6 +96,7 @@ def generate_brief(
     Args:
         research_question: The researcher's core question, used as the retrieval query.
         session_id: The project session ID for ChromaDB lookup.
+        api_key: User-supplied API key.
 
     Returns:
         ChatResponse with the four-section brief and sources used.
@@ -123,14 +120,18 @@ def generate_brief(
         chunks_formatted=chunks_formatted,
     )
 
-    response = client.messages.create(
-        model="claude-sonnet-4-5",
-        max_tokens=4000,
+    text = complete(
         messages=[{"role": "user", "content": prompt}],
+        system=CHAT_SYSTEM_PROMPT.format(
+            research_question=research_question,
+            paper_count=len({c["source"] for c in chunks}),
+        ),
+        api_key=api_key,
+        max_tokens=BRIEF_MAX_TOKENS,
     )
 
     return ChatResponse(
-        content=response.content[0].text,
+        content=text,
         sources=list({c["source"] for c in chunks}),
         chunks_retrieved=len(chunks),
     )
@@ -142,6 +143,7 @@ async def stream_chat(
     research_question: str,
     paper_count: int,
     history: list[dict],
+    api_key: str = "",
 ) -> AsyncIterator[str]:
     """Stream a grounded chat response chunk by chunk via SSE."""
     chunks = await asyncio.to_thread(retrieve, message, session_id)
@@ -170,14 +172,12 @@ async def stream_chat(
     sources = list({c["source"] for c in chunks})
 
     try:
-        async with async_client.messages.stream(
-            model="claude-sonnet-4-5",
-            max_tokens=2000,
-            system=system_prompt,
+        async for text in stream_complete(
             messages=messages,
-        ) as stream:
-            async for text in stream.text_stream:
-                yield _sse("chunk", text=text)
+            system=system_prompt,
+            api_key=api_key,
+        ):
+            yield _sse("chunk", text=text)
     except Exception as exc:
         logger.error("stream_chat error: %s", exc)
         yield _sse("error", message=str(exc))
@@ -189,6 +189,7 @@ async def stream_chat(
 async def stream_brief(
     research_question: str,
     session_id: str,
+    api_key: str = "",
 ) -> AsyncIterator[str]:
     """Stream a full research brief chunk by chunk via SSE."""
     chunks = await asyncio.to_thread(retrieve, research_question, session_id, 20)
@@ -208,13 +209,16 @@ async def stream_brief(
     sources = list({c["source"] for c in chunks})
 
     try:
-        async with async_client.messages.stream(
-            model="claude-sonnet-4-5",
-            max_tokens=4000,
+        async for text in stream_complete(
             messages=[{"role": "user", "content": prompt}],
-        ) as stream:
-            async for text in stream.text_stream:
-                yield _sse("chunk", text=text)
+            system=CHAT_SYSTEM_PROMPT.format(
+                research_question=research_question,
+                paper_count=len({c["source"] for c in chunks}),
+            ),
+            api_key=api_key,
+            max_tokens=BRIEF_MAX_TOKENS,
+        ):
+            yield _sse("chunk", text=text)
     except Exception as exc:
         logger.error("stream_brief error: %s", exc)
         yield _sse("error", message=str(exc))
