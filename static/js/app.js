@@ -5,7 +5,7 @@
 import { initUpload, initAddPapers } from "./upload.js";
 import { initCards, renderCards, loadCards } from "./cards.js";
 import { initChat, resetChat, loadChatHistory, triggerBrief } from "./chat.js";
-import { initSessions } from "./sessions.js";
+import { initSidebar, refreshSidebar, setActiveSidebarSession } from "./sidebar.js";
 import { api } from "./api.js";
 
 const SESSION_STORAGE_KEY = "primer_session";
@@ -26,15 +26,9 @@ const $stageUpload = document.getElementById("stage-upload");
 const $stageCards = document.getElementById("stage-cards");
 const $stageChat = document.getElementById("stage-chat");
 
-const $navMeta = document.getElementById("nav-meta");
-const $navQuestion = document.getElementById("nav-question");
 const $navActions = document.getElementById("nav-actions");
 const $btnBackToCards = document.getElementById("btn-back-to-cards");
-const $btnNewSession = document.getElementById("btn-new-session");
-const $btnEditQuestion   = document.getElementById("btn-edit-question");
-const $editQuestionInput = document.getElementById("edit-question-input");
-const $btnSaveQuestion   = document.getElementById("btn-save-question");
-const $staleBanner       = document.getElementById("question-stale-banner");
+const $staleBanner = document.getElementById("question-stale-banner");
 
 // ── Stage transitions ────────────────────────────────────────
 function goToStage(n) {
@@ -42,9 +36,7 @@ function goToStage(n) {
   $stageCards.classList.toggle("stage--hidden", n !== 2);
   $stageChat.classList.toggle("stage--hidden", n !== 3);
 
-  $navMeta.hidden = n === 1;
-  $navActions.hidden = n === 1;
-  $btnEditQuestion.hidden = n === 1;
+  $navActions.hidden = n !== 3;
 
   // Scroll to top of new stage
   window.scrollTo(0, 0);
@@ -79,9 +71,9 @@ function setSession(sessionId, researchQuestion, paperCount) {
   state.sessionId = sessionId;
   state.researchQuestion = researchQuestion;
   state.paperCount = paperCount;
-  $navQuestion.textContent = researchQuestion;
   chatLoadedForSession = null; // reset so history is re-loaded
   saveSession();
+  setActiveSidebarSession(sessionId);
 }
 
 // ── Session resume ────────────────────────────────────────────
@@ -92,10 +84,11 @@ function handleSessionResume(sessionId, researchQuestion, paperCount) {
 }
 
 // ── Upload success ────────────────────────────────────────────
-function handleUploadSuccess(sessionId, researchQuestion, papers) {
+async function handleUploadSuccess(sessionId, researchQuestion, papers) {
   setSession(sessionId, researchQuestion, papers.length);
   renderCards(papers);
   goToStage(2);
+  await refreshSidebar({ onResumeSession: handleSessionResume, onRenameSession: handleRename });
 }
 
 // ── Add papers success ────────────────────────────────────────
@@ -111,61 +104,37 @@ function handleGenerateBrief() {
   setTimeout(() => triggerBrief(getState), 50);
 }
 
-// ── Nav actions ───────────────────────────────────────────────
-$btnBackToCards.addEventListener("click", () => goToStage(2));
+// ── Rename callback (from sidebar) ───────────────────────────
+function handleRename(sessionId, newQuestion) {
+  if (sessionId === state.sessionId) {
+    state.researchQuestion = newQuestion;
+    saveSession();
+    $staleBanner.hidden = false;
+  }
+}
 
-$btnNewSession.addEventListener("click", () => {
+// ── New session ───────────────────────────────────────────────
+function handleNewSession() {
   localStorage.removeItem(SESSION_STORAGE_KEY);
   state.sessionId = null;
   state.researchQuestion = "";
   state.paperCount = 0;
-  $navQuestion.textContent = "";
   chatLoadedForSession = null;
   $staleBanner.hidden = true;
+  setActiveSidebarSession(null);
   goToStage(1);
-  initSessions({ onResume: handleSessionResume });
-});
-
-// ── Research question edit ────────────────────────────────────
-$btnEditQuestion.addEventListener("click", () => {
-  $navQuestion.hidden = true;
-  $btnEditQuestion.hidden = true;
-  $editQuestionInput.value = state.researchQuestion;
-  $editQuestionInput.hidden = false;
-  $btnSaveQuestion.hidden = false;
-  $editQuestionInput.focus();
-});
-
-async function saveQuestion() {
-  const newQ = $editQuestionInput.value.trim();
-  if (!newQ || newQ === state.researchQuestion) { cancelEdit(); return; }
-  try {
-    await api.updateSession(state.sessionId, newQ);
-    state.researchQuestion = newQ;
-    $navQuestion.textContent = newQ;
-    saveSession();
-    $staleBanner.hidden = false;
-    cancelEdit();
-  } catch (err) {
-    // stay in edit mode on error; user can retry
-    console.error("Failed to update question:", err);
-  }
 }
 
-function cancelEdit() {
-  $editQuestionInput.hidden = true;
-  $btnSaveQuestion.hidden = true;
-  $navQuestion.hidden = false;
-  $btnEditQuestion.hidden = false;
-}
-
-$btnSaveQuestion.addEventListener("click", saveQuestion);
-$editQuestionInput.addEventListener("keydown", (e) => {
-  if (e.key === "Enter") { e.preventDefault(); saveQuestion(); }
-  if (e.key === "Escape") cancelEdit();
-});
+// ── Nav actions ───────────────────────────────────────────────
+$btnBackToCards.addEventListener("click", () => goToStage(2));
 
 // ── Module initialization ─────────────────────────────────────
+initSidebar({
+  onNewSession: handleNewSession,
+  onResumeSession: handleSessionResume,
+  onRenameSession: handleRename,
+});
+
 initUpload({ onSuccess: handleUploadSuccess });
 
 initCards({
@@ -175,7 +144,6 @@ initCards({
 
 initChat({ getState });
 
-initSessions({ onResume: handleSessionResume });
 initAddPapers({ getState, onAddSuccess: handleAddPapersSuccess });
 
 // ── Session restore ───────────────────────────────────────────

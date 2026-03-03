@@ -53,16 +53,20 @@
     <!-- Main App (hidden until key is entered) -->
     <div id="app" style="display:none;">
       <nav class="app-nav">
+        <button
+          type="button"
+          class="app-nav__toggle"
+          id="btn-sidebar-toggle"
+          aria-label="Toggle sidebar"
+          aria-expanded="false"
+        >
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+            <line x1="3" y1="6" x2="21" y2="6"/>
+            <line x1="3" y1="12" x2="21" y2="12"/>
+            <line x1="3" y1="18" x2="21" y2="18"/>
+          </svg>
+        </button>
         <a href="#" class="app-nav__logo">P<span class="ri">ri</span>mer</a>
-        <div class="app-nav__meta" id="nav-meta" hidden>
-          <span class="app-nav__session-label" id="nav-question"></span>
-          <button type="button" class="btn btn--ghost btn--sm nav-edit-btn"
-            id="btn-edit-question" hidden aria-label="Edit research question">✎</button>
-          <input type="text" class="nav-edit-input" id="edit-question-input"
-            maxlength="2000" hidden aria-label="Edit research question" />
-          <button type="button" class="btn btn--ghost btn--sm"
-            id="btn-save-question" hidden>Save</button>
-        </div>
         <div class="app-nav__actions" id="nav-actions" hidden>
           <button
             type="button"
@@ -71,248 +75,248 @@
           >
             ← Cards
           </button>
-          <button
-            type="button"
-            class="btn btn--ghost btn--sm"
-            id="btn-new-session"
-          >
-            New session
-          </button>
         </div>
       </nav>
 
-      <div class="stale-banner" id="question-stale-banner" hidden>
-        Relevance scores reflect the original research question — not recomputed.
-      </div>
+      <aside class="sidebar" id="sidebar" aria-label="Sessions">
+        <div class="sidebar__header">
+          <button class="btn btn--primary sidebar__new-btn" id="btn-new-session" type="button">
+            + New session
+          </button>
+        </div>
+        <nav aria-label="Recent sessions">
+          <ul id="sidebar-sessions-list" class="sidebar__list"></ul>
+        </nav>
+      </aside>
 
-      <main class="app-main">
-        <!-- ── Stage 1: Upload ────────────────────────────────── -->
-        <section
-          id="stage-upload"
-          class="stage stage--upload"
-          aria-label="Upload papers"
-        >
-          <div class="upload-container">
-            <div class="sessions-panel" id="sessions-panel" hidden>
-              <h2 class="sessions-panel__heading">Recent sessions</h2>
-              <ul class="sessions-list" id="sessions-list" aria-label="Recent sessions"></ul>
-            </div>
-            <div class="sessions-divider" id="sessions-divider" hidden>
-              <span class="sessions-divider__label">or start a new session</span>
-            </div>
-            <div class="upload-header">
-              <h1 class="upload-header__wordmark">
-                P<span class="ri">ri</span>mer<span class="upload-header__mvp">MVP</span>
-              </h1>
-              <p class="upload-header__sub">
-                Upload your papers. Get citation-grounded synthesis.
-              </p>
-            </div>
+      <div class="sidebar-backdrop"></div>
 
-            <form id="upload-form" class="upload-form" novalidate>
-              <div class="form-group">
-                <label for="research-question" class="form-label"
-                  >Research question</label
-                >
-                <textarea
-                  id="research-question"
-                  name="research_question"
-                  class="form-textarea"
-                  required
-                  minlength="10"
-                  rows="3"
-                  placeholder="e.g. What are the main approaches to multi-task driving perception?"
-                  aria-describedby="rq-hint"
-                ></textarea>
-                <span id="rq-hint" class="form-hint"
-                  >Be specific — this scopes all paper scoring and
-                  synthesis.</span
-                >
+      <div class="main-content">
+        <div class="stale-banner" id="question-stale-banner" hidden>
+          Relevance scores reflect the original research question — not recomputed.
+        </div>
+        <main class="app-main">
+          <!-- ── Stage 1: Upload ────────────────────────────────── -->
+          <section
+            id="stage-upload"
+            class="stage stage--upload"
+            aria-label="Upload papers"
+          >
+            <div class="upload-container">
+              <div class="upload-header">
+                <h1 class="upload-header__wordmark">
+                  P<span class="ri">ri</span>mer<span class="upload-header__mvp">MVP</span>
+                </h1>
+                <p class="upload-header__sub">
+                  Upload your papers. Get citation-grounded synthesis.
+                </p>
               </div>
 
-              <div class="form-group">
-                <label class="form-label">Papers (PDF)</label>
-                <div
-                  class="drop-zone"
-                  id="drop-zone"
-                  role="button"
-                  tabindex="0"
-                  aria-label="Click to select PDFs or drag and drop here"
-                >
-                  <input
-                    type="file"
-                    id="pdf-input"
-                    name="files"
-                    accept=".pdf"
-                    multiple
-                    class="drop-zone__input"
-                    aria-label="Select PDF files"
-                  />
-                  <div class="drop-zone__prompt" id="drop-prompt">
-                    <span class="drop-zone__icon" aria-hidden="true">↑</span>
-                    <span class="drop-zone__text"
-                      >Drop PDFs here or click to select</span
-                    >
-                    <span class="drop-zone__hint">Multiple files supported</span>
-                  </div>
-                  <ul
-                    class="drop-zone__file-list"
-                    id="file-list"
-                    aria-label="Selected files"
-                    hidden
-                  ></ul>
+              <form id="upload-form" class="upload-form" novalidate>
+                <div class="form-group">
+                  <label for="research-question" class="form-label"
+                    >Research question</label
+                  >
+                  <textarea
+                    id="research-question"
+                    name="research_question"
+                    class="form-textarea"
+                    required
+                    minlength="10"
+                    rows="3"
+                    placeholder="e.g. What are the main approaches to multi-task driving perception?"
+                    aria-describedby="rq-hint"
+                  ></textarea>
+                  <span id="rq-hint" class="form-hint"
+                    >Be specific — this scopes all paper scoring and
+                    synthesis.</span
+                  >
                 </div>
-              </div>
 
-              <div class="upload-form__footer">
-                <div
-                  class="upload-status"
-                  id="upload-status"
+                <div class="form-group">
+                  <label class="form-label">Papers (PDF)</label>
+                  <div
+                    class="drop-zone"
+                    id="drop-zone"
+                    role="button"
+                    tabindex="0"
+                    aria-label="Click to select PDFs or drag and drop here"
+                  >
+                    <input
+                      type="file"
+                      id="pdf-input"
+                      name="files"
+                      accept=".pdf"
+                      multiple
+                      class="drop-zone__input"
+                      aria-label="Select PDF files"
+                    />
+                    <div class="drop-zone__prompt" id="drop-prompt">
+                      <span class="drop-zone__icon" aria-hidden="true">↑</span>
+                      <span class="drop-zone__text"
+                        >Drop PDFs here or click to select</span
+                      >
+                      <span class="drop-zone__hint">Multiple files supported</span>
+                    </div>
+                    <ul
+                      class="drop-zone__file-list"
+                      id="file-list"
+                      aria-label="Selected files"
+                      hidden
+                    ></ul>
+                  </div>
+                </div>
+
+                <div class="upload-form__footer">
+                  <div
+                    class="upload-status"
+                    id="upload-status"
+                    aria-live="polite"
+                    hidden
+                  ></div>
+                  <button
+                    type="submit"
+                    class="btn btn--primary btn--lg"
+                    id="btn-upload"
+                  >
+                    Upload &amp; Analyze
+                  </button>
+                </div>
+              </form>
+            </div>
+          </section>
+
+          <!-- ── Stage 2: Cards ─────────────────────────────────── -->
+          <section
+            id="stage-cards"
+            class="stage stage--cards stage--hidden"
+            aria-label="Paper cards"
+          >
+            <div class="cards-toolbar">
+              <div class="cards-toolbar__left">
+                <span
+                  class="cards-toolbar__count"
+                  id="cards-count"
                   aria-live="polite"
-                  hidden
-                ></div>
-                <button
-                  type="submit"
-                  class="btn btn--primary btn--lg"
-                  id="btn-upload"
+                  >0 papers</span
                 >
-                  Upload &amp; Analyze
+                <label for="sort-select" class="sr-only">Sort by</label>
+                <select id="sort-select" class="form-select">
+                  <option value="relevance_score">Sort: Relevance</option>
+                  <option value="tier">Sort: Tier</option>
+                  <option value="year">Sort: Year</option>
+                  <option value="venue">Sort: Venue</option>
+                </select>
+              </div>
+              <div class="cards-toolbar__right">
+                <button type="button" class="btn btn--ghost" id="btn-add-papers">+ Add papers</button>
+                <button type="button" class="btn btn--ghost" id="btn-export-csv">
+                  Export CSV
+                </button>
+                <button
+                  type="button"
+                  class="btn btn--secondary"
+                  id="btn-generate-brief"
+                >
+                  Generate Brief
+                </button>
+                <button type="button" class="btn btn--primary" id="btn-go-chat">
+                  Chat →
                 </button>
               </div>
-            </form>
-          </div>
-        </section>
-
-        <!-- ── Stage 2: Cards ─────────────────────────────────── -->
-        <section
-          id="stage-cards"
-          class="stage stage--cards stage--hidden"
-          aria-label="Paper cards"
-        >
-          <div class="cards-toolbar">
-            <div class="cards-toolbar__left">
-              <span
-                class="cards-toolbar__count"
-                id="cards-count"
-                aria-live="polite"
-                >0 papers</span
-              >
-              <label for="sort-select" class="sr-only">Sort by</label>
-              <select id="sort-select" class="form-select">
-                <option value="relevance_score">Sort: Relevance</option>
-                <option value="tier">Sort: Tier</option>
-                <option value="year">Sort: Year</option>
-                <option value="venue">Sort: Venue</option>
-              </select>
             </div>
-            <div class="cards-toolbar__right">
-              <button type="button" class="btn btn--ghost" id="btn-add-papers">+ Add papers</button>
-              <button type="button" class="btn btn--ghost" id="btn-export-csv">
-                Export CSV
-              </button>
-              <button
-                type="button"
-                class="btn btn--secondary"
-                id="btn-generate-brief"
-              >
-                Generate Brief
-              </button>
-              <button type="button" class="btn btn--primary" id="btn-go-chat">
-                Chat →
-              </button>
+
+            <div class="add-papers-wrap" id="add-papers-form-wrap" hidden>
+              <form id="add-papers-form" class="add-papers-form" novalidate>
+                <input type="file" id="add-papers-input" accept=".pdf" multiple
+                  class="add-papers-input" aria-label="Select PDFs to add" />
+                <button type="submit" class="btn btn--primary btn--sm"
+                  id="btn-add-papers-submit">Upload &amp; Analyze</button>
+                <span class="upload-status" id="add-papers-status" hidden></span>
+              </form>
             </div>
-          </div>
 
-          <div class="add-papers-wrap" id="add-papers-form-wrap" hidden>
-            <form id="add-papers-form" class="add-papers-form" novalidate>
-              <input type="file" id="add-papers-input" accept=".pdf" multiple
-                class="add-papers-input" aria-label="Select PDFs to add" />
-              <button type="submit" class="btn btn--primary btn--sm"
-                id="btn-add-papers-submit">Upload &amp; Analyze</button>
-              <span class="upload-status" id="add-papers-status" hidden></span>
-            </form>
-          </div>
+            <div
+              class="cards-status"
+              id="cards-status"
+              aria-live="polite"
+              hidden
+            ></div>
 
-          <div
-            class="cards-status"
-            id="cards-status"
-            aria-live="polite"
-            hidden
-          ></div>
+            <div class="table-wrap">
+              <table class="cards-table" id="cards-table">
+                <thead>
+                  <tr>
+                    <th class="cards-table__th">Title</th>
+                    <th class="cards-table__th">Venue</th>
+                    <th class="cards-table__th cards-table__th--year">Year</th>
+                    <th class="cards-table__th">Task</th>
+                    <th class="cards-table__th cards-table__th--wide">
+                      Methodology
+                    </th>
+                    <th class="cards-table__th cards-table__th--wide">Results</th>
+                    <th class="cards-table__th">Datasets</th>
+                    <th class="cards-table__th cards-table__th--score">Score</th>
+                    <th class="cards-table__th cards-table__th--wide">
+                      Synthesis Note
+                    </th>
+                  </tr>
+                </thead>
+                <tbody
+                  id="cards-tbody"
+                  aria-live="polite"
+                  aria-label="Paper cards"
+                ></tbody>
+              </table>
+            </div>
+          </section>
 
-          <div class="table-wrap">
-            <table class="cards-table" id="cards-table">
-              <thead>
-                <tr>
-                  <th class="cards-table__th">Title</th>
-                  <th class="cards-table__th">Venue</th>
-                  <th class="cards-table__th cards-table__th--year">Year</th>
-                  <th class="cards-table__th">Task</th>
-                  <th class="cards-table__th cards-table__th--wide">
-                    Methodology
-                  </th>
-                  <th class="cards-table__th cards-table__th--wide">Results</th>
-                  <th class="cards-table__th">Datasets</th>
-                  <th class="cards-table__th cards-table__th--score">Score</th>
-                  <th class="cards-table__th cards-table__th--wide">
-                    Synthesis Note
-                  </th>
-                </tr>
-              </thead>
-              <tbody
-                id="cards-tbody"
-                aria-live="polite"
-                aria-label="Paper cards"
-              ></tbody>
-            </table>
-          </div>
-        </section>
-
-        <!-- ── Stage 3: Chat ──────────────────────────────────── -->
-        <section
-          id="stage-chat"
-          class="stage stage--chat stage--hidden"
-          aria-label="Research chat"
-        >
-          <div
-            class="chat-messages"
-            id="chat-messages"
-            aria-live="polite"
-            aria-label="Chat messages"
+          <!-- ── Stage 3: Chat ──────────────────────────────────── -->
+          <section
+            id="stage-chat"
+            class="stage stage--chat stage--hidden"
+            aria-label="Research chat"
           >
-            <div class="chat-empty" id="chat-empty">
-              <p class="chat-empty__text">
-                Ask a question about your papers, or generate a full research
-                brief.
-              </p>
+            <div
+              class="chat-messages"
+              id="chat-messages"
+              aria-live="polite"
+              aria-label="Chat messages"
+            >
+              <div class="chat-empty" id="chat-empty">
+                <p class="chat-empty__text">
+                  Ask a question about your papers, or generate a full research
+                  brief.
+                </p>
+              </div>
             </div>
-          </div>
 
-          <div class="chat-input-area">
-            <button type="button" class="btn btn--brief" id="btn-brief-shortcut">
-              Generate My Research Brief
-            </button>
-            <form id="chat-form" class="chat-form">
-              <label for="chat-input" class="sr-only">Message</label>
-              <textarea
-                id="chat-input"
-                class="chat-form__input"
-                placeholder="Ask about your papers…"
-                rows="1"
-                maxlength="4000"
-                aria-label="Chat message"
-              ></textarea>
-              <button
-                type="submit"
-                class="btn btn--primary chat-form__send"
-                id="btn-send"
-              >
-                Send
+            <div class="chat-input-area">
+              <button type="button" class="btn btn--brief" id="btn-brief-shortcut">
+                Generate My Research Brief
               </button>
-            </form>
-          </div>
-        </section>
-      </main>
+              <form id="chat-form" class="chat-form">
+                <label for="chat-input" class="sr-only">Message</label>
+                <textarea
+                  id="chat-input"
+                  class="chat-form__input"
+                  placeholder="Ask about your papers…"
+                  rows="1"
+                  maxlength="4000"
+                  aria-label="Chat message"
+                ></textarea>
+                <button
+                  type="submit"
+                  class="btn btn--primary chat-form__send"
+                  id="btn-send"
+                >
+                  Send
+                </button>
+              </form>
+            </div>
+          </section>
+        </main>
+      </div>
     </div>
 
     <script type="module" src="/static/js/app.js" defer></script>
