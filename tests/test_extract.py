@@ -4,7 +4,7 @@ from unittest.mock import patch
 
 import pytest
 
-from core.extract import _truncate_paper_text, extract_paper_card, get_session_cards
+from core.extract import _truncate_paper_text, extract_paper_card, get_session_cards, _api_error_message
 from core.extract import FRONT_CHARS, BACK_CHARS, MAX_PAPER_TEXT_CHARS
 from models.paper import PaperCard
 
@@ -131,6 +131,47 @@ def test_extract_paper_card_persists_json_to_disk(tmp_path):
     assert card_path.exists()
     saved = PaperCard.model_validate_json(card_path.read_text())
     assert saved.title == VALID_CARD_JSON["title"]
+
+
+# ---------------------------------------------------------------------------
+# extract_paper_card — API exception handling
+# ---------------------------------------------------------------------------
+
+
+def test_extract_paper_card_catches_api_exception(tmp_path):
+    with patch("core.extract.complete", side_effect=Exception("API call failed")):
+        with patch("core.extract.CARDS_DIR", tmp_path):
+            card = extract_paper_card(
+                "text", "paper.pdf", "question", "session", api_key="sk-ant-test"
+            )
+
+    assert card.error is True
+    assert card.filename == "paper.pdf"
+
+
+def test_extract_paper_card_api_exception_persists_error_card(tmp_path):
+    with patch("core.extract.complete", side_effect=Exception("API call failed")):
+        with patch("core.extract.CARDS_DIR", tmp_path):
+            extract_paper_card(
+                "text", "paper.pdf", "question", "session", api_key="sk-ant-test"
+            )
+
+    card_path = tmp_path / "session" / "paper.pdf.json"
+    assert card_path.exists()
+
+
+def test_extract_paper_card_api_error_message_context_window(tmp_path):
+    with patch(
+        "core.extract.complete",
+        side_effect=Exception("prompt is too long, exceeds context window"),
+    ):
+        with patch("core.extract.CARDS_DIR", tmp_path):
+            card = extract_paper_card(
+                "text", "paper.pdf", "question", "session", api_key="sk-ant-test"
+            )
+
+    assert card.error is True
+    assert "context window" in card.methodology or "too large" in card.methodology
 
 
 # ---------------------------------------------------------------------------
