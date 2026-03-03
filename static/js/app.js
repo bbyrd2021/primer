@@ -83,12 +83,25 @@ function handleSessionResume(sessionId, researchQuestion, paperCount) {
   loadCards(sessionId);
 }
 
+// ── Delete session ────────────────────────────────────────────
+async function handleDeleteSession(sessionId, $li) {
+  try {
+    await api.deleteSession(sessionId);
+  } catch {
+    return; // Silently abort — server rejected the delete
+  }
+  $li.remove();
+  if (sessionId === state.sessionId) {
+    handleNewSession();
+  }
+}
+
 // ── Upload success ────────────────────────────────────────────
 async function handleUploadSuccess(sessionId, researchQuestion, papers) {
   setSession(sessionId, researchQuestion, papers.length);
   renderCards(papers);
   goToStage(2);
-  await refreshSidebar({ onResumeSession: handleSessionResume, onRenameSession: handleRename });
+  await refreshSidebar({ onResumeSession: handleSessionResume, onRenameSession: handleRename, onDeleteSession: handleDeleteSession });
 }
 
 // ── Add papers success ────────────────────────────────────────
@@ -133,6 +146,7 @@ initSidebar({
   onNewSession: handleNewSession,
   onResumeSession: handleSessionResume,
   onRenameSession: handleRename,
+  onDeleteSession: handleDeleteSession,
 });
 
 initUpload({ onSuccess: handleUploadSuccess });

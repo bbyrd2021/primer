@@ -122,7 +122,17 @@ export const api = {
   },
 
   getSessions: () =>
-    fetch(`${API_BASE}/sessions`).then(handleResponse),
+    fetch(`${API_BASE}/sessions`, {
+      headers: { "X-LLM-Key": apiKey.get() },
+    }).then(handleResponse),
+
+  deleteSession: (sessionId) =>
+    fetch(`${API_BASE}/sessions/${encodeURIComponent(sessionId)}`, {
+      method: "DELETE",
+      headers: { "X-LLM-Key": apiKey.get() },
+    }).then((r) => {
+      if (!r.ok) return r.json().catch(() => ({ detail: r.statusText })).then((e) => { throw new APIError(e.detail || "Request failed", r.status); });
+    }),
 
   getSession: (sessionId) =>
     fetch(`${API_BASE}/sessions/${encodeURIComponent(sessionId)}`).then(handleResponse),

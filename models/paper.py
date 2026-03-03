@@ -43,6 +43,7 @@ class SessionMeta(BaseModel):
     created_at: datetime
     paper_count: int = 0
     updated_at: datetime | None = None
+    user_id: str | None = None
 
 
 class UpdateSessionRequest(BaseModel):

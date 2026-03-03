@@ -7,7 +7,7 @@ const STORAGE_KEY = "primer_sidebar_open";
 
 let currentSessionId = null;
 
-export function initSidebar({ onNewSession, onResumeSession, onRenameSession }) {
+export function initSidebar({ onNewSession, onResumeSession, onRenameSession, onDeleteSession }) {
   const $toggle = document.getElementById("btn-sidebar-toggle");
   const $newBtn = document.getElementById("btn-new-session");
   const $backdrop = document.querySelector(".sidebar-backdrop");
@@ -23,7 +23,7 @@ export function initSidebar({ onNewSession, onResumeSession, onRenameSession }) 
 
   $newBtn.addEventListener("click", onNewSession);
 
-  loadSessions({ onResumeSession, onRenameSession });
+  loadSessions({ onResumeSession, onRenameSession, onDeleteSession });
 }
 
 function toggleSidebar($toggle) {
@@ -32,8 +32,8 @@ function toggleSidebar($toggle) {
   localStorage.setItem(STORAGE_KEY, String(isOpen));
 }
 
-export async function refreshSidebar({ onResumeSession, onRenameSession }) {
-  await loadSessions({ onResumeSession, onRenameSession });
+export async function refreshSidebar({ onResumeSession, onRenameSession, onDeleteSession }) {
+  await loadSessions({ onResumeSession, onRenameSession, onDeleteSession });
 }
 
 export function setActiveSidebarSession(sessionId) {
@@ -46,7 +46,7 @@ export function setActiveSidebarSession(sessionId) {
   });
 }
 
-async function loadSessions({ onResumeSession, onRenameSession }) {
+async function loadSessions({ onResumeSession, onRenameSession, onDeleteSession }) {
   const $list = document.getElementById("sidebar-sessions-list");
   if (!$list) return;
 
@@ -55,7 +55,7 @@ async function loadSessions({ onResumeSession, onRenameSession }) {
     $list.innerHTML = "";
     const fragment = document.createDocumentFragment();
     for (const s of sessions) {
-      fragment.appendChild(buildItem(s, { onResumeSession, onRenameSession }));
+      fragment.appendChild(buildItem(s, { onResumeSession, onRenameSession, onDeleteSession }));
     }
     $list.appendChild(fragment);
   } catch {
@@ -63,7 +63,7 @@ async function loadSessions({ onResumeSession, onRenameSession }) {
   }
 }
 
-function buildItem(session, { onResumeSession, onRenameSession }) {
+function buildItem(session, { onResumeSession, onRenameSession, onDeleteSession }) {
   const $li = document.createElement("li");
   $li.className = "sidebar-item";
   $li.dataset.sessionId = session.session_id;
@@ -99,8 +99,23 @@ function buildItem(session, { onResumeSession, onRenameSession }) {
     startRename($li, $q, session, onRenameSession);
   });
 
+  const $delete = document.createElement("button");
+  $delete.type = "button";
+  $delete.className = "sidebar-item__delete";
+  $delete.setAttribute("aria-label", "Delete session");
+  $delete.textContent = "×";
+  $delete.addEventListener("click", (e) => {
+    e.stopPropagation();
+    if (onDeleteSession) onDeleteSession(session.session_id, $li);
+  });
+
+  const $actions = document.createElement("div");
+  $actions.className = "sidebar-item__actions";
+  $actions.appendChild($delete);
+  $actions.appendChild($rename);
+
   $li.appendChild($body);
-  $li.appendChild($rename);
+  $li.appendChild($actions);
   return $li;
 }
 

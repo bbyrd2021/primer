@@ -1,5 +1,6 @@
 # main.py
 import asyncio
+import hashlib
 import logging
 import shutil
 import uuid
@@ -13,7 +14,7 @@ from fastapi.staticfiles import StaticFiles
 from core.embeddings import index_chunks
 from core.extract import extract_paper_card, get_session_cards
 from core.ingest import chunk_pages, estimate_text_density, extract_text
-from core.sessions import list_sessions, load_meta, save_meta
+from core.sessions import delete_session, list_sessions, load_meta, save_meta
 from core.synthesize import chat, generate_brief, stream_brief, stream_chat
 from models.message import ChatRequest, ChatResponse
 from models.paper import PaperCard, SessionMeta, UpdateSessionRequest, UploadResponse
@@ -31,6 +32,11 @@ app.mount("/static", StaticFiles(directory="static"), name="static")
 
 # Low text density threshold — below this, warn the user about scan quality
 LOW_DENSITY_THRESHOLD = 100  # chars per page
+
+
+def _derive_user_id(api_key: str) -> str:
+    """Derive a stable user identifier from an API key (SHA-256, first 16 hex chars)."""
+    return hashlib.sha256(api_key.encode()).hexdigest()[:16]
 
 
 def _validate_llm_key(x_llm_key: str) -> None:
@@ -58,8 +64,15 @@ async def upload_papers(
 ) -> UploadResponse:
     """Upload and process PDFs. Runs card extraction and chunk indexing per file."""
     _validate_llm_key(x_llm_key)
+    user_id = _derive_user_id(x_llm_key)
 
     if not session_id:
+        existing_sessions = list_sessions(user_id=user_id)
+        if len(existing_sessions) >= 3:
+            raise HTTPException(
+                status_code=409,
+                detail="Session limit reached (3 max). Delete a session to create a new one.",
+            )
         session_id = str(uuid.uuid4())
 
     session_dir = UPLOAD_DIR / session_id
@@ -93,6 +106,7 @@ async def upload_papers(
         research_question=research_question,
         paper_count=paper_count,
         created_at=existing_meta.created_at if existing_meta else None,
+        user_id=existing_meta.user_id if existing_meta and existing_meta.user_id else user_id,
     )
 
     return UploadResponse(
@@ -155,8 +169,9 @@ async def get_cards(session_id: str) -> list[PaperCard]:
 
 
 @app.get("/api/sessions", response_model=list[SessionMeta])
-async def get_sessions() -> list[SessionMeta]:
-    return list_sessions()
+async def get_sessions(x_llm_key: str = Header(...)) -> list[SessionMeta]:
+    _validate_llm_key(x_llm_key)
+    return list_sessions(user_id=_derive_user_id(x_llm_key))
 
 
 @app.get("/api/sessions/{session_id}", response_model=SessionMeta)
@@ -179,6 +194,20 @@ async def update_session(session_id: str, body: UpdateSessionRequest) -> Session
         created_at=existing.created_at,
         updated_at=datetime.now(timezone.utc),
     )
+
+
+@app.delete("/api/sessions/{session_id}", status_code=status.HTTP_204_NO_CONTENT)
+async def delete_session_route(
+    session_id: str,
+    x_llm_key: str = Header(...),
+) -> None:
+    """Delete a session and all its data. Only the owning user may delete."""
+    _validate_llm_key(x_llm_key)
+    user_id = _derive_user_id(x_llm_key)
+    meta = load_meta(session_id)
+    if meta is None or meta.user_id != user_id:
+        raise HTTPException(status_code=404, detail="Session not found")
+    delete_session(session_id)
 
 
 @app.post("/api/chat", response_model=ChatResponse)
