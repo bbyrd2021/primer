@@ -46,5 +46,15 @@ class SessionMeta(BaseModel):
     user_id: str | None = None
 
 
+class SessionMetaPublic(BaseModel):
+    """SessionMeta without user_id — safe to return in API responses."""
+
+    session_id: str
+    research_question: str
+    created_at: datetime
+    paper_count: int = 0
+    updated_at: datetime | None = None
+
+
 class UpdateSessionRequest(BaseModel):
     research_question: str = Field(..., min_length=1, max_length=2000)

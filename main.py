@@ -2,6 +2,7 @@
 import asyncio
 import hashlib
 import logging
+import os
 import shutil
 import uuid
 from datetime import datetime, timezone
@@ -17,10 +18,16 @@ from core.ingest import chunk_pages, estimate_text_density, extract_text
 from core.sessions import delete_session, list_sessions, load_meta, save_meta
 from core.synthesize import chat, generate_brief, stream_brief, stream_chat
 from models.message import ChatRequest, ChatResponse
-from models.paper import PaperCard, SessionMeta, UpdateSessionRequest, UploadResponse
+from models.paper import PaperCard, SessionMeta, SessionMetaPublic, UpdateSessionRequest, UploadResponse
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
+
+_USER_ID_PEPPER = os.getenv("USER_ID_PEPPER", "")
+if not _USER_ID_PEPPER:
+    logger.warning(
+        "USER_ID_PEPPER is not set. Set it in .env to protect stored user identifiers."
+    )
 
 app = FastAPI(title="Primer", version="0.1.0")
 
@@ -35,8 +42,13 @@ LOW_DENSITY_THRESHOLD = 100  # chars per page
 
 
 def _derive_user_id(api_key: str) -> str:
-    """Derive a stable user identifier from an API key (SHA-256, first 16 hex chars)."""
-    return hashlib.sha256(api_key.encode()).hexdigest()[:16]
+    """Derive a stable user identifier from an API key.
+
+    Peppered SHA-256 so the stored hash is not reproducible from the
+    algorithm alone — an attacker who reads cards_db/ still needs the
+    server secret to confirm which key maps to which sessions.
+    """
+    return hashlib.sha256((_USER_ID_PEPPER + api_key).encode()).hexdigest()[:16]
 
 
 def _validate_llm_key(x_llm_key: str) -> None:
@@ -168,13 +180,13 @@ async def get_cards(session_id: str) -> list[PaperCard]:
     return get_session_cards(session_id)
 
 
-@app.get("/api/sessions", response_model=list[SessionMeta])
+@app.get("/api/sessions", response_model=list[SessionMetaPublic])
 async def get_sessions(x_llm_key: str = Header(...)) -> list[SessionMeta]:
     _validate_llm_key(x_llm_key)
     return list_sessions(user_id=_derive_user_id(x_llm_key))
 
 
-@app.get("/api/sessions/{session_id}", response_model=SessionMeta)
+@app.get("/api/sessions/{session_id}", response_model=SessionMetaPublic)
 async def get_session(session_id: str) -> SessionMeta:
     meta = load_meta(session_id)
     if meta is None:
@@ -182,7 +194,7 @@ async def get_session(session_id: str) -> SessionMeta:
     return meta
 
 
-@app.patch("/api/sessions/{session_id}", response_model=SessionMeta)
+@app.patch("/api/sessions/{session_id}", response_model=SessionMetaPublic)
 async def update_session(session_id: str, body: UpdateSessionRequest) -> SessionMeta:
     existing = load_meta(session_id)
     if existing is None:
