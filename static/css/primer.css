@@ -744,6 +744,19 @@ body {
   to { width: 1.2em; }
 }
 
+/* Blinking cursor on the last rendered block while streaming */
+.chat-message--streaming .chat-message__body > *:last-child::after {
+  content: '▍';
+  display: inline;
+  margin-left: 2px;
+  opacity: 0.6;
+  animation: blink 0.9s step-end infinite;
+}
+
+@keyframes blink {
+  50% { opacity: 0; }
+}
+
 /* Markdown elements inside assistant messages */
 .chat-message__body h3 {
   font-family: var(--font-serif);

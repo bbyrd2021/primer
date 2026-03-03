@@ -29,3 +29,6 @@ Thumbs.db
 # Markdown
 *.md
 !README.md
+
+# Landing Folder
+primer-landing/

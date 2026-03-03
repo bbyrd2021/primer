@@ -125,18 +125,18 @@ async function handleSend({ message, generateBrief, getState }) {
       },
       (chunk) => {
         if (!streamingStarted) {
-          // First chunk: drop the "Thinking" state and start showing text
           streamingStarted = true;
           $streamMsg.classList.remove("chat-message--loading");
-          $streamBody.textContent = "";
+          $streamMsg.classList.add("chat-message--streaming");
         }
         accumulated += chunk;
-        $streamBody.textContent = accumulated;
-        scrollToBottom($messages);
+        $streamBody.innerHTML = renderContent(accumulated);
+        autoScroll($messages);
       },
     );
 
-    // Stream finished: do the full markdown + citation render
+    // Stream finished: remove cursor, do a clean final render
+    $streamMsg.classList.remove("chat-message--streaming");
     $streamBody.innerHTML = renderContent(accumulated);
     if (result.sources.length > 0) {
       const $src = document.createElement("div");
@@ -242,6 +242,13 @@ function scrollToBottom($el) {
   $el.scrollTop = $el.scrollHeight;
 }
 
+function autoScroll($el) {
+  const distanceFromBottom = $el.scrollHeight - $el.scrollTop - $el.clientHeight;
+  if (distanceFromBottom < 100) {
+    $el.scrollTop = $el.scrollHeight;
+  }
+}
+
 function saveHistory(sessionId) {
   // Keep last 40 entries (20 turns) to avoid localStorage bloat
   const trimmed = chatHistory.slice(-40);
@@ -283,12 +290,15 @@ function renderContent(text) {
   for (const line of lines) {
     const escaped = escapeHtml(line);
 
-    if (line.startsWith("## ")) {
-      if (inList) { parts.push("</ul>"); inList = false; }
-      parts.push(`<h3>${applyInline(escapeHtml(line.slice(3)))}</h3>`);
-    } else if (line.startsWith("### ")) {
+    if (line.startsWith("### ")) {
       if (inList) { parts.push("</ul>"); inList = false; }
       parts.push(`<h4>${applyInline(escapeHtml(line.slice(4)))}</h4>`);
+    } else if (line.startsWith("## ")) {
+      if (inList) { parts.push("</ul>"); inList = false; }
+      parts.push(`<h3>${applyInline(escapeHtml(line.slice(3)))}</h3>`);
+    } else if (line.startsWith("# ")) {
+      if (inList) { parts.push("</ul>"); inList = false; }
+      parts.push(`<h2>${applyInline(escapeHtml(line.slice(2)))}</h2>`);
     } else if (/^[-*] /.test(line)) {
       if (!inList) { parts.push("<ul>"); inList = true; }
       parts.push(`<li>${applyInline(escapeHtml(line.slice(2)))}</li>`);
