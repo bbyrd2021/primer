@@ -1,6 +1,55 @@
 // static/js/upload.js
 import { api, APIError } from "./api.js";
 
+export function initAddPapers({ getState, onAddSuccess }) {
+  const $wrap   = document.getElementById("add-papers-form-wrap");
+  const $form   = document.getElementById("add-papers-form");
+  const $input  = document.getElementById("add-papers-input");
+  const $status = document.getElementById("add-papers-status");
+  const $btn    = document.getElementById("btn-add-papers-submit");
+  const $toggle = document.getElementById("btn-add-papers");
+  if (!$form) return;
+
+  let files = [];
+
+  $toggle.addEventListener("click", () => {
+    $wrap.hidden = !$wrap.hidden;
+  });
+
+  $input.addEventListener("change", () => {
+    const pdfs = Array.from($input.files).filter(f => f.name.toLowerCase().endsWith(".pdf"));
+    // dedupe by name+size
+    files = [...files, ...pdfs.filter(f => !files.some(x => x.name === f.name && x.size === f.size))];
+    $input.value = "";
+    $status.hidden = false;
+    $status.textContent = `${files.length} file(s) ready`;
+  });
+
+  $form.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    if (!files.length) return;
+    const { sessionId, researchQuestion } = getState();
+    const formData = new FormData();
+    formData.append("session_id", sessionId);
+    formData.append("research_question", researchQuestion);
+    files.forEach(f => formData.append("files", f));
+    $btn.disabled = true;
+    $status.hidden = false;
+    $status.textContent = `Uploading ${files.length} paper(s)…`;
+    try {
+      const result = await api.uploadPapers(formData);
+      $status.textContent = "Done — cards updated.";
+      files = [];
+      $wrap.hidden = true;
+      onAddSuccess(result);
+    } catch (err) {
+      $status.textContent = err.message || "Upload failed.";
+    } finally {
+      $btn.disabled = false;
+    }
+  });
+}
+
 // Module-level file list — maintained separately from the FileList
 // because FileList is immutable (can't remove individual files).
 let selectedFiles = [];

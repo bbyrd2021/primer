@@ -1,6 +1,7 @@
 # tests/test_main.py
 import io
 import json
+from datetime import datetime, timezone
 from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
@@ -8,7 +9,7 @@ from fastapi.testclient import TestClient
 
 from main import app
 from models.message import ChatResponse
-from models.paper import PaperCard, UploadResponse
+from models.paper import PaperCard, SessionMeta, UploadResponse
 
 client = TestClient(app)
 
@@ -25,6 +26,12 @@ DUMMY_UPLOAD_RESPONSE = UploadResponse(
     papers=[DUMMY_CARD],
     total_papers=1,
     total_chunks=5,
+)
+DUMMY_META = SessionMeta(
+    session_id="sess-123",
+    research_question="What is RLHF?",
+    created_at=datetime(2024, 6, 1, 12, 0, 0, tzinfo=timezone.utc),
+    paper_count=1,
 )
 DUMMY_CHAT_RESPONSE = ChatResponse(
     content="Answer text",
@@ -181,3 +188,106 @@ def test_chat_stream_valid_key_returns_sse():
 
     assert response.status_code == 200
     assert "text/event-stream" in response.headers["content-type"]
+
+
+# ---------------------------------------------------------------------------
+# GET /api/sessions
+# ---------------------------------------------------------------------------
+
+
+def test_get_sessions_empty_list():
+    with patch("main.list_sessions", return_value=[]):
+        response = client.get("/api/sessions")
+    assert response.status_code == 200
+    assert response.json() == []
+
+
+def test_get_sessions_returns_sessions():
+    with patch("main.list_sessions", return_value=[DUMMY_META]):
+        response = client.get("/api/sessions")
+    assert response.status_code == 200
+    body = response.json()
+    assert len(body) == 1
+    assert body[0]["session_id"] == "sess-123"
+    assert body[0]["research_question"] == "What is RLHF?"
+
+
+# ---------------------------------------------------------------------------
+# GET /api/sessions/{session_id}
+# ---------------------------------------------------------------------------
+
+
+def test_get_session_found():
+    with patch("main.load_meta", return_value=DUMMY_META):
+        response = client.get("/api/sessions/sess-123")
+    assert response.status_code == 200
+    assert response.json()["session_id"] == "sess-123"
+
+
+def test_get_session_not_found():
+    with patch("main.load_meta", return_value=None):
+        response = client.get("/api/sessions/missing")
+    assert response.status_code == 404
+
+
+# ---------------------------------------------------------------------------
+# PATCH /api/sessions/{session_id}
+# ---------------------------------------------------------------------------
+
+
+def test_patch_session_not_found():
+    with patch("main.load_meta", return_value=None):
+        response = client.patch(
+            "/api/sessions/missing",
+            json={"research_question": "Updated question"},
+        )
+    assert response.status_code == 404
+
+
+def test_patch_session_updates_question():
+    updated_meta = SessionMeta(
+        session_id="sess-123",
+        research_question="Updated question",
+        created_at=DUMMY_META.created_at,
+        paper_count=1,
+        updated_at=datetime(2024, 6, 2, 12, 0, 0, tzinfo=timezone.utc),
+    )
+    with patch("main.load_meta", return_value=DUMMY_META), \
+         patch("main.save_meta", return_value=updated_meta):
+        response = client.patch(
+            "/api/sessions/sess-123",
+            json={"research_question": "Updated question"},
+        )
+    assert response.status_code == 200
+    assert response.json()["research_question"] == "Updated question"
+    assert response.json()["updated_at"] is not None
+
+
+def test_patch_session_empty_question_returns_422():
+    response = client.patch(
+        "/api/sessions/sess-123",
+        json={"research_question": ""},
+    )
+    assert response.status_code == 422
+
+
+# ---------------------------------------------------------------------------
+# POST /api/upload — save_meta is called
+# ---------------------------------------------------------------------------
+
+
+def test_upload_calls_save_meta(tmp_path):
+    files, data, headers = _make_pdf_form(VALID_ANT_KEY)
+
+    async def fake_process(file, rq, session_id, session_dir, api_key=""):
+        return DUMMY_CARD, 5
+
+    with patch("main._process_single_file", side_effect=fake_process), \
+         patch("main.get_session_cards", return_value=[DUMMY_CARD]), \
+         patch("main.save_meta", return_value=DUMMY_META) as mock_save:
+        response = client.post(
+            "/api/upload", files=files, data=data, headers=headers
+        )
+
+    assert response.status_code == 200
+    mock_save.assert_called_once()

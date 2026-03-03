@@ -3,6 +3,7 @@ import asyncio
 import logging
 import shutil
 import uuid
+from datetime import datetime, timezone
 from pathlib import Path
 
 from fastapi import FastAPI, File, Form, Header, HTTPException, UploadFile, status
@@ -12,9 +13,10 @@ from fastapi.staticfiles import StaticFiles
 from core.embeddings import index_chunks
 from core.extract import extract_paper_card, get_session_cards
 from core.ingest import chunk_pages, estimate_text_density, extract_text
+from core.sessions import list_sessions, load_meta, save_meta
 from core.synthesize import chat, generate_brief, stream_brief, stream_chat
 from models.message import ChatRequest, ChatResponse
-from models.paper import PaperCard, UploadResponse
+from models.paper import PaperCard, SessionMeta, UpdateSessionRequest, UploadResponse
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -83,6 +85,16 @@ async def upload_papers(
         cards.append(card)
         total_chunks += n_chunks
 
+    existing_meta = load_meta(session_id)
+    all_cards = get_session_cards(session_id)
+    paper_count = sum(1 for c in all_cards if not c.error)
+    save_meta(
+        session_id=session_id,
+        research_question=research_question,
+        paper_count=paper_count,
+        created_at=existing_meta.created_at if existing_meta else None,
+    )
+
     return UploadResponse(
         session_id=session_id,
         papers=cards,
@@ -140,6 +152,33 @@ async def _process_single_file(
 async def get_cards(session_id: str) -> list[PaperCard]:
     """Return all extracted paper cards for a session, sorted by relevance."""
     return get_session_cards(session_id)
+
+
+@app.get("/api/sessions", response_model=list[SessionMeta])
+async def get_sessions() -> list[SessionMeta]:
+    return list_sessions()
+
+
+@app.get("/api/sessions/{session_id}", response_model=SessionMeta)
+async def get_session(session_id: str) -> SessionMeta:
+    meta = load_meta(session_id)
+    if meta is None:
+        raise HTTPException(status_code=404, detail="Session not found")
+    return meta
+
+
+@app.patch("/api/sessions/{session_id}", response_model=SessionMeta)
+async def update_session(session_id: str, body: UpdateSessionRequest) -> SessionMeta:
+    existing = load_meta(session_id)
+    if existing is None:
+        raise HTTPException(status_code=404, detail="Session not found")
+    return save_meta(
+        session_id=session_id,
+        research_question=body.research_question,
+        paper_count=existing.paper_count,
+        created_at=existing.created_at,
+        updated_at=datetime.now(timezone.utc),
+    )
 
 
 @app.post("/api/chat", response_model=ChatResponse)

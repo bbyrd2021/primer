@@ -1,4 +1,5 @@
 # models/paper.py
+from datetime import datetime
 from pydantic import BaseModel, Field
 
 
@@ -34,3 +35,15 @@ class UploadResponse(BaseModel):
     papers: list[PaperCard]
     total_papers: int
     total_chunks: int
+
+
+class SessionMeta(BaseModel):
+    session_id: str
+    research_question: str
+    created_at: datetime
+    paper_count: int = 0
+    updated_at: datetime | None = None
+
+
+class UpdateSessionRequest(BaseModel):
+    research_question: str = Field(..., min_length=1, max_length=2000)

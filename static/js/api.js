@@ -120,4 +120,17 @@ export const api = {
 
     return { sources, chunksRetrieved };
   },
+
+  getSessions: () =>
+    fetch(`${API_BASE}/sessions`).then(handleResponse),
+
+  getSession: (sessionId) =>
+    fetch(`${API_BASE}/sessions/${encodeURIComponent(sessionId)}`).then(handleResponse),
+
+  updateSession: (sessionId, researchQuestion) =>
+    fetch(`${API_BASE}/sessions/${encodeURIComponent(sessionId)}`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ research_question: researchQuestion }),
+    }).then(handleResponse),
 };

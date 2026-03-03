@@ -115,6 +115,8 @@ def get_session_cards(session_id: str) -> list[PaperCard]:
 
     cards = []
     for card_file in session_dir.glob("*.json"):
+        if card_file.name == "meta.json":
+            continue
         try:
             card = PaperCard.model_validate_json(card_file.read_text())
             cards.append(card)

@@ -56,6 +56,12 @@
         <a href="#" class="app-nav__logo">P<span class="ri">ri</span>mer</a>
         <div class="app-nav__meta" id="nav-meta" hidden>
           <span class="app-nav__session-label" id="nav-question"></span>
+          <button type="button" class="btn btn--ghost btn--sm nav-edit-btn"
+            id="btn-edit-question" hidden aria-label="Edit research question">✎</button>
+          <input type="text" class="nav-edit-input" id="edit-question-input"
+            maxlength="2000" hidden aria-label="Edit research question" />
+          <button type="button" class="btn btn--ghost btn--sm"
+            id="btn-save-question" hidden>Save</button>
         </div>
         <div class="app-nav__actions" id="nav-actions" hidden>
           <button
@@ -75,6 +81,10 @@
         </div>
       </nav>
 
+      <div class="stale-banner" id="question-stale-banner" hidden>
+        Relevance scores reflect the original research question — not recomputed.
+      </div>
+
       <main class="app-main">
         <!-- ── Stage 1: Upload ────────────────────────────────── -->
         <section
@@ -83,6 +93,13 @@
           aria-label="Upload papers"
         >
           <div class="upload-container">
+            <div class="sessions-panel" id="sessions-panel" hidden>
+              <h2 class="sessions-panel__heading">Recent sessions</h2>
+              <ul class="sessions-list" id="sessions-list" aria-label="Recent sessions"></ul>
+            </div>
+            <div class="sessions-divider" id="sessions-divider" hidden>
+              <span class="sessions-divider__label">or start a new session</span>
+            </div>
             <div class="upload-header">
               <h1 class="upload-header__wordmark">
                 P<span class="ri">ri</span>mer<span class="upload-header__mvp">MVP</span>
@@ -189,6 +206,7 @@
               </select>
             </div>
             <div class="cards-toolbar__right">
+              <button type="button" class="btn btn--ghost" id="btn-add-papers">+ Add papers</button>
               <button type="button" class="btn btn--ghost" id="btn-export-csv">
                 Export CSV
               </button>
@@ -203,6 +221,16 @@
                 Chat →
               </button>
             </div>
+          </div>
+
+          <div class="add-papers-wrap" id="add-papers-form-wrap" hidden>
+            <form id="add-papers-form" class="add-papers-form" novalidate>
+              <input type="file" id="add-papers-input" accept=".pdf" multiple
+                class="add-papers-input" aria-label="Select PDFs to add" />
+              <button type="submit" class="btn btn--primary btn--sm"
+                id="btn-add-papers-submit">Upload &amp; Analyze</button>
+              <span class="upload-status" id="add-papers-status" hidden></span>
+            </form>
           </div>
 
           <div
