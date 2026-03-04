@@ -54,6 +54,20 @@ export function initAddPapers({ getState, onAddSuccess }) {
 // because FileList is immutable (can't remove individual files).
 let selectedFiles = [];
 
+export function resetUpload() {
+  selectedFiles = [];
+  const $fileList = document.getElementById("file-list");
+  const $dropPrompt = document.getElementById("drop-prompt");
+  const $status = document.getElementById("upload-status");
+  const $question = document.getElementById("research-question");
+  const $btnUpload = document.getElementById("btn-upload");
+  if ($fileList) { $fileList.innerHTML = ""; $fileList.hidden = true; }
+  if ($dropPrompt) $dropPrompt.hidden = false;
+  if ($status) { $status.hidden = true; $status.textContent = ""; }
+  if ($question) $question.value = "";
+  if ($btnUpload) $btnUpload.disabled = false;
+}
+
 export function initUpload({ onSuccess }) {
   const $form = document.getElementById("upload-form");
   const $dropZone = document.getElementById("drop-zone");

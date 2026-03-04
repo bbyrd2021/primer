@@ -2,7 +2,7 @@
 // Orchestrator — manages stage transitions and shared session state.
 // Imports from all other modules; nothing imports from here.
 
-import { initUpload, initAddPapers } from "./upload.js";
+import { initUpload, initAddPapers, resetUpload } from "./upload.js";
 import { initCards, renderCards, loadCards } from "./cards.js";
 import { initChat, resetChat, loadChatHistory, triggerBrief } from "./chat.js";
 import { initSidebar, refreshSidebar, setActiveSidebarSession } from "./sidebar.js";
@@ -135,6 +135,7 @@ function handleNewSession() {
   chatLoadedForSession = null;
   $staleBanner.hidden = true;
   setActiveSidebarSession(null);
+  resetUpload();
   goToStage(1);
 }
 
