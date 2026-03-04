@@ -20,9 +20,9 @@
         <h1 class="key-gate-heading">Enter your API key to get started</h1>
         <p class="key-gate-body">
           Primer uses Claude or GPT-4o to extract and synthesize your research
-          papers. During the beta, you'll need your own key — we're not charging API
-          costs yet. Your key is stored only in your browser session and is never
-          logged or stored on our servers.
+          papers. During the beta, you'll need your own key — we're not charging
+          API costs yet. Your key is stored only in your browser session and is
+          never logged or stored on our servers.
         </p>
         <div class="key-gate-input-row">
           <input
@@ -44,14 +44,15 @@
             >platform.openai.com</a
           >
         </p>
-        <p id="key-gate-error" class="key-gate-error" style="display:none;">
-          Please enter a valid Anthropic (sk-ant-...) or OpenAI (sk-...) API key.
+        <p id="key-gate-error" class="key-gate-error" style="display: none">
+          Please enter a valid Anthropic (sk-ant-...) or OpenAI (sk-...) API
+          key.
         </p>
       </div>
     </div>
 
     <!-- Main App (hidden until key is entered) -->
-    <div id="app" style="display:none;">
+    <div id="app" style="display: none">
       <nav class="app-nav">
         <button
           type="button"
@@ -60,10 +61,18 @@
           aria-label="Toggle sidebar"
           aria-expanded="false"
         >
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
-            <line x1="3" y1="6" x2="21" y2="6"/>
-            <line x1="3" y1="12" x2="21" y2="12"/>
-            <line x1="3" y1="18" x2="21" y2="18"/>
+          <svg
+            width="18"
+            height="18"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+          >
+            <line x1="3" y1="6" x2="21" y2="6" />
+            <line x1="3" y1="12" x2="21" y2="12" />
+            <line x1="3" y1="18" x2="21" y2="18" />
           </svg>
         </button>
         <a href="#" class="app-nav__logo">P<span class="ri">ri</span>mer</a>
@@ -80,7 +89,11 @@
 
       <aside class="sidebar" id="sidebar" aria-label="Sessions">
         <div class="sidebar__header">
-          <button class="btn btn--primary sidebar__new-btn" id="btn-new-session" type="button">
+          <button
+            class="btn btn--primary sidebar__new-btn"
+            id="btn-new-session"
+            type="button"
+          >
             + New session
           </button>
         </div>
@@ -93,7 +106,8 @@
 
       <div class="main-content">
         <div class="stale-banner" id="question-stale-banner" hidden>
-          Relevance scores reflect the original research question — not recomputed.
+          Relevance scores reflect the original research question — not
+          recomputed.
         </div>
         <main class="app-main">
           <!-- ── Stage 1: Upload ────────────────────────────────── -->
@@ -105,7 +119,9 @@
             <div class="upload-container">
               <div class="upload-header">
                 <h1 class="upload-header__wordmark">
-                  P<span class="ri">ri</span>mer<span class="upload-header__mvp">MVP</span>
+                  P<span class="ri">ri</span>mer<span class="upload-header__mvp"
+                    >MVP</span
+                  >
                 </h1>
                 <p class="upload-header__sub">
                   Upload your papers. Get citation-grounded synthesis.
@@ -135,6 +151,7 @@
 
                 <div class="form-group">
                   <label class="form-label">Papers (PDF)</label>
+                  <span class="form-hint">Start with 3 papers or fewer — you can add more from the cards view after processing.</span>
                   <div
                     class="drop-zone"
                     id="drop-zone"
@@ -156,7 +173,9 @@
                       <span class="drop-zone__text"
                         >Drop PDFs here or click to select</span
                       >
-                      <span class="drop-zone__hint">Multiple files supported</span>
+                      <span class="drop-zone__hint"
+                        >Multiple files supported</span
+                      >
                     </div>
                     <ul
                       class="drop-zone__file-list"
@@ -167,7 +186,13 @@
                   </div>
                 </div>
 
-                <div id="pipeline-status" class="pipeline-status" hidden aria-label="Processing pipeline" aria-live="polite">
+                <div
+                  id="pipeline-status"
+                  class="pipeline-status"
+                  hidden
+                  aria-label="Processing pipeline"
+                  aria-live="polite"
+                >
                   <ol class="pipeline-stages" role="list">
                     <li class="pipeline-stage" data-stage="0">
                       <div class="pipeline-stage__dot" aria-hidden="true"></div>
@@ -234,8 +259,18 @@
                 </select>
               </div>
               <div class="cards-toolbar__right">
-                <button type="button" class="btn btn--ghost" id="btn-add-papers">+ Add papers</button>
-                <button type="button" class="btn btn--ghost" id="btn-export-csv">
+                <button
+                  type="button"
+                  class="btn btn--ghost"
+                  id="btn-add-papers"
+                >
+                  + Add papers
+                </button>
+                <button
+                  type="button"
+                  class="btn btn--ghost"
+                  id="btn-export-csv"
+                >
                   Export CSV
                 </button>
                 <button
@@ -253,11 +288,26 @@
 
             <div class="add-papers-wrap" id="add-papers-form-wrap" hidden>
               <form id="add-papers-form" class="add-papers-form" novalidate>
-                <input type="file" id="add-papers-input" accept=".pdf" multiple
-                  class="add-papers-input" aria-label="Select PDFs to add" />
-                <button type="submit" class="btn btn--primary btn--sm"
-                  id="btn-add-papers-submit">Upload &amp; Analyze</button>
-                <span class="upload-status" id="add-papers-status" hidden></span>
+                <input
+                  type="file"
+                  id="add-papers-input"
+                  accept=".pdf"
+                  multiple
+                  class="add-papers-input"
+                  aria-label="Select PDFs to add"
+                />
+                <button
+                  type="submit"
+                  class="btn btn--primary btn--sm"
+                  id="btn-add-papers-submit"
+                >
+                  Upload &amp; Analyze
+                </button>
+                <span
+                  class="upload-status"
+                  id="add-papers-status"
+                  hidden
+                ></span>
               </form>
             </div>
 
@@ -279,9 +329,13 @@
                     <th class="cards-table__th cards-table__th--wide">
                       Methodology
                     </th>
-                    <th class="cards-table__th cards-table__th--wide">Results</th>
+                    <th class="cards-table__th cards-table__th--wide">
+                      Results
+                    </th>
                     <th class="cards-table__th">Datasets</th>
-                    <th class="cards-table__th cards-table__th--score">Score</th>
+                    <th class="cards-table__th cards-table__th--score">
+                      Score
+                    </th>
                     <th class="cards-table__th cards-table__th--wide">
                       Synthesis Note
                     </th>
@@ -317,7 +371,11 @@
             </div>
 
             <div class="chat-input-area">
-              <button type="button" class="btn btn--brief" id="btn-brief-shortcut">
+              <button
+                type="button"
+                class="btn btn--brief"
+                id="btn-brief-shortcut"
+              >
                 Generate My Research Brief
               </button>
               <form id="chat-form" class="chat-form">
