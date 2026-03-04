@@ -99,8 +99,14 @@ async function handleDeleteSession(sessionId, $li) {
 // ── Upload success ────────────────────────────────────────────
 async function handleUploadSuccess(sessionId, researchQuestion, papers) {
   setSession(sessionId, researchQuestion, papers.length);
-  renderCards(papers);
+
+  // Animate the upload stage out, then reveal cards so row stagger starts fresh
+  $stageUpload.classList.add("stage--exiting");
+  await new Promise((r) => setTimeout(r, 240));
+  $stageUpload.classList.remove("stage--exiting");
+
   goToStage(2);
+  renderCards(papers);
   await refreshSidebar({ onResumeSession: handleSessionResume, onRenameSession: handleRename, onDeleteSession: handleDeleteSession });
 }
 

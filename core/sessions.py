@@ -29,7 +29,7 @@ def save_meta(
         user_id=user_id,
     )
     session_dir = CARDS_DIR / session_id
-    session_dir.mkdir(exist_ok=True)
+    session_dir.mkdir(parents=True, exist_ok=True)
     (session_dir / "meta.json").write_text(meta.model_dump_json(indent=2))
     return meta
 

@@ -90,7 +90,7 @@ def extract_paper_card(
             error=True,
         )
         session_dir = CARDS_DIR / session_id
-        session_dir.mkdir(exist_ok=True)
+        session_dir.mkdir(parents=True, exist_ok=True)
         card_path = session_dir / f"{filename}.json"
         card_path.write_text(card.model_dump_json(indent=2))
         return card

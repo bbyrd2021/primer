@@ -69,8 +69,8 @@ export function renderCards(papers) {
   const sorted = sortedCards(papers);
   const fragment = document.createDocumentFragment();
 
-  for (const card of sorted) {
-    fragment.appendChild(buildRow(card));
+  for (const [i, card] of sorted.entries()) {
+    fragment.appendChild(buildRow(card, i));
   }
 
   $tbody.innerHTML = "";
@@ -94,10 +94,11 @@ function sortedCards(cards) {
   });
 }
 
-function buildRow(card) {
+function buildRow(card, rowIndex = 0) {
   const tier = card.tier ?? 3;
   const $tr = document.createElement("tr");
   $tr.className = `paper-card paper-card--tier-${tier}${card.error ? " paper-card--error" : ""}`;
+  $tr.style.setProperty("--row-i", rowIndex);
 
   $tr.appendChild(buildTitleTd(card));
   $tr.appendChild(buildTextTd(card.venue));
