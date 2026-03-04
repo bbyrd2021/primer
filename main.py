@@ -20,6 +20,10 @@ from core.synthesize import chat, generate_brief, stream_brief, stream_chat
 from models.message import ChatRequest, ChatResponse
 from models.paper import PaperCard, SessionMeta, SessionMetaPublic, UpdateSessionRequest, UploadResponse
 
+from dotenv import load_dotenv
+
+load_dotenv()
+
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 

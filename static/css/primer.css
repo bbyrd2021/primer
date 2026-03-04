@@ -603,6 +603,103 @@ body.sidebar-open .main-content { padding-left: 260px; }
   color: var(--color-success);
 }
 
+/* ── Pipeline status stepper ───────────────────────────────── */
+.pipeline-status {
+  padding: var(--space-5) 0 var(--space-4);
+}
+
+.pipeline-stages {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  position: relative;
+}
+
+.pipeline-stage {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-2);
+  position: relative;
+  flex: 1;
+}
+
+/* Connector line between stages */
+.pipeline-stage + .pipeline-stage::before {
+  content: '';
+  position: absolute;
+  top: 10px;
+  left: calc(-50% + 10px);
+  right: calc(50% + 10px);
+  height: 1px;
+  background: var(--color-rule);
+  z-index: 0;
+  transition: background var(--transition-base);
+}
+
+.pipeline-stage--done + .pipeline-stage::before,
+.pipeline-stage--done + .pipeline-stage--done::before {
+  background: var(--color-success);
+}
+
+.pipeline-stage__dot {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  border: 2px solid var(--color-rule);
+  background: var(--color-white);
+  position: relative;
+  z-index: 1;
+  transition: border-color var(--transition-base), background var(--transition-base);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 10px;
+}
+
+.pipeline-stage__label {
+  font-size: var(--text-xs);
+  color: var(--color-muted);
+  text-align: center;
+  white-space: nowrap;
+  transition: color var(--transition-base);
+  font-family: var(--font-sans);
+}
+
+/* Active stage */
+.pipeline-stage--active .pipeline-stage__dot {
+  border-color: var(--color-maroon);
+  background: var(--color-maroon);
+  animation: pipelinePulse 1.4s ease-in-out infinite;
+}
+.pipeline-stage--active .pipeline-stage__label {
+  color: var(--color-ink);
+  font-weight: 500;
+}
+
+/* Done stage */
+.pipeline-stage--done .pipeline-stage__dot {
+  border-color: var(--color-success);
+  background: var(--color-success);
+}
+.pipeline-stage--done .pipeline-stage__dot::after {
+  content: '✓';
+  font-size: 10px;
+  color: white;
+  line-height: 1;
+}
+.pipeline-stage--done .pipeline-stage__label {
+  color: var(--color-success);
+}
+
+@keyframes pipelinePulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(122, 21, 37, 0.25); }
+  50%       { box-shadow: 0 0 0 5px rgba(122, 21, 37, 0); }
+}
+
 /* ── Upload progress rows ──────────────────────────────────── */
 .upload-progress-item {
   display: flex;

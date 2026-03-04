@@ -64,6 +64,7 @@ export function resetUpload() {
   if ($fileList) { $fileList.innerHTML = ""; $fileList.hidden = true; }
   if ($dropPrompt) $dropPrompt.hidden = false;
   if ($status) { $status.hidden = true; $status.textContent = ""; }
+  resetPipeline();
   if ($question) $question.value = "";
   if ($btnUpload) $btnUpload.disabled = false;
 }
@@ -240,6 +241,33 @@ function failAllRows($fileList) {
   });
 }
 
+// ── Pipeline stepper ──────────────────────────────────────────
+let _pipelineTimers = [];
+
+function showPipeline() {
+  const $el = document.getElementById("pipeline-status");
+  if ($el) $el.hidden = false;
+  advancePipeline(0);
+}
+
+function advancePipeline(n) {
+  const $stages = document.querySelectorAll("#pipeline-status .pipeline-stage");
+  $stages.forEach(($s, i) => {
+    $s.classList.toggle("pipeline-stage--done", i < n);
+    $s.classList.toggle("pipeline-stage--active", i === n);
+  });
+}
+
+function resetPipeline() {
+  _pipelineTimers.forEach(clearTimeout);
+  _pipelineTimers = [];
+  const $el = document.getElementById("pipeline-status");
+  if ($el) $el.hidden = true;
+  document.querySelectorAll("#pipeline-status .pipeline-stage").forEach(($s) => {
+    $s.classList.remove("pipeline-stage--active", "pipeline-stage--done");
+  });
+}
+
 // XHR wrapper that fires onProgress(pct 0–100) and resolves with parsed JSON.
 function uploadWithProgress(formData, onProgress) {
   return new Promise((resolve, reject) => {
@@ -306,36 +334,38 @@ async function handleSubmit({ $status, $btnUpload, $fileList, $dropPrompt, onSuc
   // Swap file list to progress rows before the request fires
   renderUploadProgress($fileList, $dropPrompt, filesToUpload);
 
-  const count = filesToUpload.length;
-  showStatus(
-    $status,
-    `Uploading ${count} paper${count !== 1 ? "s" : ""} — this may take a moment…`,
-  );
+  // Show pipeline stepper; suppress status text while it's running
+  showPipeline();
+  $status.hidden = true;
 
   try {
     const result = await uploadWithProgress(formData, (pct) => {
       $fileList.querySelectorAll(".upload-progress-bar").forEach(($bar) => {
         if (pct >= 100) {
-          // Bytes uploaded — switch to indeterminate shimmer while server extracts
+          // Bytes uploaded — advance to Extracting text; shimmer bars while server works
           $bar.classList.add("upload-progress-bar--indeterminate");
           $bar.style.removeProperty("--pct");
         } else {
           $bar.style.setProperty("--pct", `${pct}%`);
         }
       });
+      if (pct >= 100) {
+        advancePipeline(1);
+        _pipelineTimers.push(setTimeout(() => advancePipeline(2), 1500));
+        _pipelineTimers.push(setTimeout(() => advancePipeline(3), 2500));
+        _pipelineTimers.push(setTimeout(() => advancePipeline(4), 4500));
+      }
     });
 
+    // Mark all stages done before resolving rows
+    advancePipeline(5);
     resolveUploadRows($fileList, filesToUpload, result.papers);
-    showStatus(
-      $status,
-      `Done — ${result.total_papers} papers indexed.`,
-      "success",
-    );
     selectedFiles = [];
     // Brief pause so users can see the resolved states before stage transition
     await new Promise((r) => setTimeout(r, 600));
     onSuccess(result.session_id, question, result.papers);
   } catch (err) {
+    resetPipeline();
     failAllRows($fileList);
     const msg =
       err instanceof APIError

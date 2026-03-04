@@ -167,6 +167,31 @@
                   </div>
                 </div>
 
+                <div id="pipeline-status" class="pipeline-status" hidden aria-label="Processing pipeline" aria-live="polite">
+                  <ol class="pipeline-stages" role="list">
+                    <li class="pipeline-stage" data-stage="0">
+                      <div class="pipeline-stage__dot" aria-hidden="true"></div>
+                      <span class="pipeline-stage__label">Uploading</span>
+                    </li>
+                    <li class="pipeline-stage" data-stage="1">
+                      <div class="pipeline-stage__dot" aria-hidden="true"></div>
+                      <span class="pipeline-stage__label">Extracting text</span>
+                    </li>
+                    <li class="pipeline-stage" data-stage="2">
+                      <div class="pipeline-stage__dot" aria-hidden="true"></div>
+                      <span class="pipeline-stage__label">Chunking</span>
+                    </li>
+                    <li class="pipeline-stage" data-stage="3">
+                      <div class="pipeline-stage__dot" aria-hidden="true"></div>
+                      <span class="pipeline-stage__label">Indexing</span>
+                    </li>
+                    <li class="pipeline-stage" data-stage="4">
+                      <div class="pipeline-stage__dot" aria-hidden="true"></div>
+                      <span class="pipeline-stage__label">Analyzing</span>
+                    </li>
+                  </ol>
+                </div>
+
                 <div class="upload-form__footer">
                   <div
                     class="upload-status"
