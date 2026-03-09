@@ -4,14 +4,13 @@ import os
 from pathlib import Path
 
 import chromadb
-from chromadb.utils import embedding_functions
+from chromadb.utils.embedding_functions import DefaultEmbeddingFunction
 
 logger = logging.getLogger(__name__)
 
 # Load embedding model once at module level — not on every call
-_embedding_function = embedding_functions.SentenceTransformerEmbeddingFunction(
-    model_name="all-MiniLM-L6-v2"
-)
+# Uses ONNXMiniLM_L6_V2 via onnxruntime (no PyTorch dependency)
+_embedding_function = DefaultEmbeddingFunction()
 
 # Cache ChromaDB clients per session — don't recreate on every request
 _chroma_clients: dict[str, chromadb.PersistentClient] = {}
