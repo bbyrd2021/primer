@@ -35,8 +35,9 @@ if not _USER_ID_PEPPER:
 
 app = FastAPI(title="Primer", version="0.1.0")
 
-UPLOAD_DIR = Path("uploads")
-UPLOAD_DIR.mkdir(exist_ok=True)
+_DATA_DIR = Path(os.getenv("DATA_DIR", "."))
+UPLOAD_DIR = _DATA_DIR / "uploads"
+UPLOAD_DIR.mkdir(parents=True, exist_ok=True)
 
 # Serve static files
 app.mount("/static", StaticFiles(directory="static"), name="static")
@@ -64,6 +65,11 @@ def _validate_llm_key(x_llm_key: str) -> None:
             status_code=400,
             detail="A valid Anthropic or OpenAI API key is required to use Primer.",
         )
+
+
+@app.get("/health")
+async def health() -> dict:
+    return {"status": "ok"}
 
 
 @app.get("/", response_class=HTMLResponse)

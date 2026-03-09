@@ -1,5 +1,6 @@
 # core/sessions.py
 import logging
+import os
 import shutil
 from datetime import datetime, timezone
 from pathlib import Path
@@ -7,7 +8,8 @@ from pathlib import Path
 from models.paper import SessionMeta
 
 logger = logging.getLogger(__name__)
-CARDS_DIR = Path("cards_db")
+_DATA_DIR = Path(os.getenv("DATA_DIR", "."))
+CARDS_DIR = _DATA_DIR / "cards_db"
 
 
 def save_meta(
@@ -67,5 +69,5 @@ def list_sessions(user_id: str | None = None) -> list[SessionMeta]:
 def delete_session(session_id: str) -> None:
     """Delete all data for a session (cards, uploads, ChromaDB)."""
     shutil.rmtree(CARDS_DIR / session_id, ignore_errors=True)
-    shutil.rmtree(Path("uploads") / session_id, ignore_errors=True)
-    shutil.rmtree(Path("chroma_db") / session_id, ignore_errors=True)
+    shutil.rmtree(_DATA_DIR / "uploads" / session_id, ignore_errors=True)
+    shutil.rmtree(_DATA_DIR / "chroma_db" / session_id, ignore_errors=True)

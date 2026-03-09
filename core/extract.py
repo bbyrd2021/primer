@@ -1,6 +1,7 @@
 # core/extract.py
 import json
 import logging
+import os
 from pathlib import Path
 
 from core.llm import BRIEF_MAX_TOKENS, complete
@@ -10,8 +11,8 @@ from models.paper import PaperCard
 logger = logging.getLogger(__name__)
 
 # Constants
-CARDS_DIR = Path("cards_db")
-CARDS_DIR.mkdir(exist_ok=True)
+CARDS_DIR = Path(os.getenv("DATA_DIR", ".")) / "cards_db"
+CARDS_DIR.mkdir(parents=True, exist_ok=True)
 
 MAX_PAPER_TEXT_CHARS: int = 60_000
 FRONT_CHARS: int = 40_000

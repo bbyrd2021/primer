@@ -1,5 +1,7 @@
 # core/embeddings.py
 import logging
+import os
+from pathlib import Path
 
 import chromadb
 from chromadb.utils import embedding_functions
@@ -19,7 +21,7 @@ def _get_collection(session_id: str) -> chromadb.Collection:
     """Get or create ChromaDB collection for a session. Cached per session."""
     if session_id not in _chroma_clients:
         _chroma_clients[session_id] = chromadb.PersistentClient(
-            path=f"./chroma_db/{session_id}"
+            path=str(Path(os.getenv("DATA_DIR", ".")) / "chroma_db" / session_id)
         )
     client = _chroma_clients[session_id]
     return client.get_or_create_collection(
