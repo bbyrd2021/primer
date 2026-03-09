@@ -15,15 +15,16 @@
   <body>
     <!-- API Key Gate -->
     <div id="key-gate">
-      <div class="key-gate-inner">
-        <div class="key-gate-logo">Primer</div>
-        <h1 class="key-gate-heading">Enter your API key to get started</h1>
-        <p class="key-gate-body">
-          Primer uses Claude or GPT-4o to extract and synthesize your research
-          papers. During the beta, you'll need your own key — we're not charging
-          API costs yet. Your key is stored only in your browser session and is
-          never logged or stored on our servers.
-        </p>
+      <div class="key-gate-hero">
+        <div class="key-gate-wordmark">
+          <span class="key-gate-wordmark-p">P</span><span
+            class="key-gate-wordmark-ri">ri</span><span
+            class="key-gate-wordmark-mer">mer</span>
+        </div>
+        <p class="key-gate-tagline">Research intelligence, grounded in your sources.</p>
+      </div>
+      <div class="key-gate-form">
+        <p class="key-gate-label">Enter your API key to begin</p>
         <div class="key-gate-input-row">
           <input
             type="password"
@@ -45,8 +46,7 @@
           >
         </p>
         <p id="key-gate-error" class="key-gate-error" style="display: none">
-          Please enter a valid Anthropic (sk-ant-...) or OpenAI (sk-...) API
-          key.
+          Please enter a valid Anthropic (sk-ant-...) or OpenAI (sk-...) API key.
         </p>
       </div>
     </div>
