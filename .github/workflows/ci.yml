@@ -1,0 +1,35 @@
+name: CI
+
+on:
+  pull_request:
+    branches: [dev, main]
+
+jobs:
+  lint-and-test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+
+      - name: Install dependencies
+        run: pip install -r requirements-dev.txt
+
+      - name: Lint with ruff
+        run: ruff check .
+
+      - name: Check formatting with black
+        run: black --check .
+
+      - name: Type check with mypy
+        run: mypy core/ models/
+
+      - name: Run tests
+        env:
+          ANTHROPIC_API_KEY: sk-fake-key-for-ci
+        run: pytest tests/ -v
