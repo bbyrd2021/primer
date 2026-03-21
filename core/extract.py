@@ -36,9 +36,15 @@ def _api_error_message(exc: Exception) -> str:
     """Map an API exception to a human-readable error description."""
     msg = str(exc).lower()
     if any(k in msg for k in ("context", "too long", "token")):
-        return "Extraction failed — paper may be too large for the model's context window."
+        return (
+            "Extraction failed — paper may be too large"
+            " for the model's context window."
+        )
     if any(k in msg for k in ("rate", "429")):
-        return "Extraction failed — rate limit reached. Try uploading fewer papers at once."
+        return (
+            "Extraction failed — rate limit reached."
+            " Try uploading fewer papers at once."
+        )
     if any(k in msg for k in ("auth", "401", "api_key")):
         return "Extraction failed — API key may be invalid."
     return f"Extraction failed — {type(exc).__name__}"
@@ -77,7 +83,11 @@ def extract_paper_card(
     try:
         raw = complete(
             messages=[{"role": "user", "content": prompt}],
-            system="You are a research paper analysis assistant. Output ONLY valid JSON — no markdown, no preamble, no explanation.",
+            system=(
+                "You are a research paper analysis assistant."
+                " Output ONLY valid JSON — no markdown,"
+                " no preamble, no explanation."
+            ),
             api_key=api_key,
             max_tokens=BRIEF_MAX_TOKENS,
         ).strip()

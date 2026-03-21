@@ -1,6 +1,8 @@
 # core/ingest.py
-import fitz  # PyMuPDF
 from pathlib import Path
+from typing import Any
+
+import fitz  # PyMuPDF
 
 # Constants
 MIN_CHUNK_WORDS: int = 50
@@ -8,7 +10,7 @@ CHUNK_SIZE: int = 800
 CHUNK_OVERLAP: int = 100
 
 
-def extract_text(pdf_path: str) -> tuple[str, list[dict]]:
+def extract_text(pdf_path: str) -> tuple[str, list[dict[str, Any]]]:
     """Extract full text and page metadata from a PDF.
 
     Args:
@@ -26,18 +28,20 @@ def extract_text(pdf_path: str) -> tuple[str, list[dict]]:
     for page_num, page in enumerate(doc):
         text = page.get_text("text").strip()
         if text:
-            pages.append({
-                "text": text,
-                "page": page_num + 1,
-                "source": Path(pdf_path).name,
-            })
+            pages.append(
+                {
+                    "text": text,
+                    "page": page_num + 1,
+                    "source": Path(pdf_path).name,
+                }
+            )
             full_text_parts.append(text)
 
     doc.close()
     return "\n\n".join(full_text_parts), pages
 
 
-def chunk_pages(pages: list[dict]) -> list[dict]:
+def chunk_pages(pages: list[dict[str, Any]]) -> list[dict[str, Any]]:
     """Split page text into overlapping chunks with source metadata.
 
     Uses word-level splitting with CHUNK_OVERLAP words of overlap between
@@ -57,12 +61,14 @@ def chunk_pages(pages: list[dict]) -> list[dict]:
             chunk_words = words[i : i + CHUNK_SIZE]
             if len(chunk_words) < MIN_CHUNK_WORDS:
                 continue
-            chunks.append({
-                "text": " ".join(chunk_words),
-                "page": page["page"],
-                "source": page["source"],
-                "chunk_id": f"{page['source']}_p{page['page']}_c{i}",
-            })
+            chunks.append(
+                {
+                    "text": " ".join(chunk_words),
+                    "page": page["page"],
+                    "source": page["source"],
+                    "chunk_id": f"{page['source']}_p{page['page']}_c{i}",
+                }
+            )
 
     return chunks
 

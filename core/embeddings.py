@@ -2,6 +2,7 @@
 import logging
 import os
 from pathlib import Path
+from typing import Any
 
 import chromadb
 from chromadb.utils.embedding_functions import DefaultEmbeddingFunction
@@ -13,10 +14,10 @@ logger = logging.getLogger(__name__)
 _embedding_function = DefaultEmbeddingFunction()
 
 # Cache ChromaDB clients per session — don't recreate on every request
-_chroma_clients: dict[str, chromadb.PersistentClient] = {}
+_chroma_clients: dict[str, Any] = {}
 
 
-def _get_collection(session_id: str) -> chromadb.Collection:
+def _get_collection(session_id: str) -> Any:
     """Get or create ChromaDB collection for a session. Cached per session."""
     if session_id not in _chroma_clients:
         _chroma_clients[session_id] = chromadb.PersistentClient(
@@ -29,7 +30,7 @@ def _get_collection(session_id: str) -> chromadb.Collection:
     )
 
 
-def index_chunks(chunks: list[dict], session_id: str) -> int:
+def index_chunks(chunks: list[dict[str, Any]], session_id: str) -> int:
     """Index chunks into ChromaDB for a session.
 
     Args:
@@ -54,7 +55,7 @@ def index_chunks(chunks: list[dict], session_id: str) -> int:
     return len(chunks)
 
 
-def retrieve(query: str, session_id: str, n_results: int = 15) -> list[dict]:
+def retrieve(query: str, session_id: str, n_results: int = 15) -> list[dict[str, Any]]:
     """Semantic search over a session's indexed chunks.
 
     Args:
@@ -78,11 +79,17 @@ def retrieve(query: str, session_id: str, n_results: int = 15) -> list[dict]:
         return []
 
     chunks = []
-    for doc, meta in zip(results["documents"][0], results["metadatas"][0]):
-        chunks.append({
-            "text": doc,
-            "source": meta["source"],
-            "page": meta["page"],
-        })
+    for doc, meta in zip(
+        results["documents"][0],
+        results["metadatas"][0],
+        strict=False,
+    ):
+        chunks.append(
+            {
+                "text": doc,
+                "source": meta["source"],
+                "page": meta["page"],
+            }
+        )
 
     return chunks

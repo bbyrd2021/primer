@@ -2,10 +2,10 @@
 import asyncio
 import json
 import logging
-from typing import AsyncIterator
+from collections.abc import AsyncIterator
 
 from core.embeddings import retrieve
-from core.llm import BRIEF_MAX_TOKENS, MAX_TOKENS, complete, stream_complete
+from core.llm import BRIEF_MAX_TOKENS, complete, stream_complete
 from core.prompts import BRIEF_PROMPT, CHAT_SYSTEM_PROMPT, format_chunks
 from models.message import ChatResponse
 
@@ -20,7 +20,7 @@ def chat(
     session_id: str,
     research_question: str,
     paper_count: int,
-    history: list[dict],
+    history: list[dict[str, str]],
     api_key: str = "",
 ) -> ChatResponse:
     """Generate a grounded chat response using RAG.
@@ -61,14 +61,16 @@ def chat(
 
     # Build messages: recent history + current message with chunks
     messages = history[-CHAT_HISTORY_TURNS * 2 :]  # last N turns = 2N messages
-    messages.append({
-        "role": "user",
-        "content": (
-            f"{message}\n\n"
-            f"Here are the relevant source chunks from your papers:\n\n"
-            f"{chunks_formatted}"
-        ),
-    })
+    messages.append(
+        {
+            "role": "user",
+            "content": (
+                f"{message}\n\n"
+                f"Here are the relevant source chunks from your papers:\n\n"
+                f"{chunks_formatted}"
+            ),
+        }
+    )
 
     text = complete(
         messages=messages,
@@ -142,17 +144,20 @@ async def stream_chat(
     session_id: str,
     research_question: str,
     paper_count: int,
-    history: list[dict],
+    history: list[dict[str, str]],
     api_key: str = "",
 ) -> AsyncIterator[str]:
     """Stream a grounded chat response chunk by chunk via SSE."""
     chunks = await asyncio.to_thread(retrieve, message, session_id)
 
     if not chunks:
-        yield _sse("chunk", text=(
-            "I don't see anything in your uploaded papers that addresses this. "
-            "You may want to search for additional literature on this topic."
-        ))
+        yield _sse(
+            "chunk",
+            text=(
+                "I don't see anything in your uploaded papers that addresses this. "
+                "You may want to search for additional literature on this topic."
+            ),
+        )
         yield _sse("done", sources=[], chunks_retrieved=0)
         return
 
@@ -160,15 +165,17 @@ async def stream_chat(
         research_question=research_question,
         paper_count=paper_count,
     )
-    messages = list(history[-CHAT_HISTORY_TURNS * 2:])
-    messages.append({
-        "role": "user",
-        "content": (
-            f"{message}\n\n"
-            f"Here are the relevant source chunks from your papers:\n\n"
-            f"{format_chunks(chunks)}"
-        ),
-    })
+    messages = list(history[-CHAT_HISTORY_TURNS * 2 :])
+    messages.append(
+        {
+            "role": "user",
+            "content": (
+                f"{message}\n\n"
+                f"Here are the relevant source chunks from your papers:\n\n"
+                f"{format_chunks(chunks)}"
+            ),
+        }
+    )
     sources = list({c["source"] for c in chunks})
 
     try:
@@ -195,10 +202,13 @@ async def stream_brief(
     chunks = await asyncio.to_thread(retrieve, research_question, session_id, 20)
 
     if not chunks:
-        yield _sse("chunk", text=(
-            "No relevant content found in your uploaded papers. "
-            "Make sure your papers are fully indexed before generating a brief."
-        ))
+        yield _sse(
+            "chunk",
+            text=(
+                "No relevant content found in your uploaded papers. "
+                "Make sure your papers are fully indexed before generating a brief."
+            ),
+        )
         yield _sse("done", sources=[], chunks_retrieved=0)
         return
 
@@ -227,6 +237,6 @@ async def stream_brief(
     yield _sse("done", sources=sources, chunks_retrieved=len(chunks))
 
 
-def _sse(event_type: str, **payload) -> str:
+def _sse(event_type: str, **payload: object) -> str:
     """Format a server-sent event data line."""
     return f"data: {json.dumps({'type': event_type, **payload})}\n\n"

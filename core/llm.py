@@ -14,7 +14,7 @@ Key detection is based on key prefix:
 
 from __future__ import annotations
 
-from typing import AsyncIterator
+from collections.abc import AsyncIterator
 
 import anthropic
 import openai
@@ -38,7 +38,7 @@ def detect_provider(api_key: str) -> str:
 
 
 def complete(
-    messages: list[dict],
+    messages: list[dict[str, str]],
     system: str,
     api_key: str,
     max_tokens: int = MAX_TOKENS,
@@ -58,28 +58,28 @@ def complete(
     provider = detect_provider(api_key)
 
     if provider == "anthropic":
-        client = anthropic.Anthropic(api_key=api_key)
-        response = client.messages.create(
+        ant_client = anthropic.Anthropic(api_key=api_key)
+        ant_response = ant_client.messages.create(
             model=ANTHROPIC_MODEL,
             max_tokens=max_tokens,
             system=system,
-            messages=messages,
+            messages=messages,  # type: ignore[arg-type]
         )
-        return response.content[0].text
+        return ant_response.content[0].text  # type: ignore[union-attr]
 
     else:  # openai
-        client = openai.OpenAI(api_key=api_key)
+        oai_client = openai.OpenAI(api_key=api_key)
         full_messages = [{"role": "system", "content": system}] + messages
-        response = client.chat.completions.create(
+        oai_response = oai_client.chat.completions.create(
             model=OPENAI_MODEL,
             max_tokens=max_tokens,
-            messages=full_messages,
+            messages=full_messages,  # type: ignore[arg-type]
         )
-        return response.choices[0].message.content
+        return oai_response.choices[0].message.content or ""
 
 
 async def stream_complete(
-    messages: list[dict],
+    messages: list[dict[str, str]],
     system: str,
     api_key: str,
     max_tokens: int = MAX_TOKENS,
@@ -99,26 +99,26 @@ async def stream_complete(
     provider = detect_provider(api_key)
 
     if provider == "anthropic":
-        async_client = anthropic.AsyncAnthropic(api_key=api_key)
-        async with async_client.messages.stream(
+        ant_async = anthropic.AsyncAnthropic(api_key=api_key)
+        async with ant_async.messages.stream(
             model=ANTHROPIC_MODEL,
             max_tokens=max_tokens,
             system=system,
-            messages=messages,
+            messages=messages,  # type: ignore[arg-type]
         ) as stream:
             async for text in stream.text_stream:
                 yield text
 
     else:  # openai
-        async_client = openai.AsyncOpenAI(api_key=api_key)
+        oai_async = openai.AsyncOpenAI(api_key=api_key)
         full_messages = [{"role": "system", "content": system}] + messages
-        stream = await async_client.chat.completions.create(
+        oai_stream = await oai_async.chat.completions.create(
             model=OPENAI_MODEL,
             max_tokens=max_tokens,
-            messages=full_messages,
+            messages=full_messages,  # type: ignore[arg-type]
             stream=True,
         )
-        async for chunk in stream:
+        async for chunk in oai_stream:  # type: ignore[union-attr]
             delta = chunk.choices[0].delta.content
             if delta is not None:
                 yield delta

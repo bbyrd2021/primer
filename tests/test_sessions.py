@@ -1,25 +1,21 @@
 # tests/test_sessions.py
-import json
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from pathlib import Path
-from unittest.mock import patch
-
-import pytest
 
 from models.paper import SessionMeta
-
 
 # ---------------------------------------------------------------------------
 # Helpers
 # ---------------------------------------------------------------------------
 
-FIXED_NOW = datetime(2024, 6, 1, 12, 0, 0, tzinfo=timezone.utc)
-FIXED_EARLIER = datetime(2024, 5, 1, 12, 0, 0, tzinfo=timezone.utc)
+FIXED_NOW = datetime(2024, 6, 1, 12, 0, 0, tzinfo=UTC)
+FIXED_EARLIER = datetime(2024, 5, 1, 12, 0, 0, tzinfo=UTC)
 
 
 def _import_sessions(tmp_path: Path):
     """Import core.sessions with CARDS_DIR patched to tmp_path."""
     import core.sessions as mod
+
     mod.CARDS_DIR = tmp_path
     return mod
 
@@ -119,7 +115,7 @@ def test_load_meta_returns_none_for_corrupt_json(tmp_path):
 
 def test_load_meta_returns_correct_session_meta(tmp_path):
     mod = _import_sessions(tmp_path)
-    saved = mod.save_meta(
+    mod.save_meta(
         session_id="sess-load",
         research_question="Test question",
         paper_count=7,

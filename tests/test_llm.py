@@ -1,15 +1,15 @@
 # tests/test_llm.py
-import pytest
 from unittest.mock import AsyncMock, MagicMock, patch
+
+import pytest
 
 from core.llm import (
     ANTHROPIC_MODEL,
     OPENAI_MODEL,
-    detect_provider,
     complete,
+    detect_provider,
     stream_complete,
 )
-
 
 # ---------------------------------------------------------------------------
 # detect_provider
@@ -112,7 +112,10 @@ def test_complete_openai_path():
     assert call_kwargs["model"] == OPENAI_MODEL
     assert call_kwargs["max_tokens"] == 200
     # System message is prepended to messages
-    assert call_kwargs["messages"][0] == {"role": "system", "content": "You are helpful."}
+    assert call_kwargs["messages"][0] == {
+        "role": "system",
+        "content": "You are helpful.",
+    }
     assert call_kwargs["messages"][1] == {"role": "user", "content": "hello"}
 
 

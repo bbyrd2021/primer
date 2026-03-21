@@ -1,10 +1,8 @@
 # tests/test_main.py
 import io
-import json
-from datetime import datetime, timezone
-from unittest.mock import AsyncMock, MagicMock, patch
+from datetime import UTC, datetime
+from unittest.mock import patch
 
-import pytest
 from fastapi.testclient import TestClient
 
 from main import app
@@ -30,7 +28,7 @@ DUMMY_UPLOAD_RESPONSE = UploadResponse(
 DUMMY_META = SessionMeta(
     session_id="sess-123",
     research_question="What is RLHF?",
-    created_at=datetime(2024, 6, 1, 12, 0, 0, tzinfo=timezone.utc),
+    created_at=datetime(2024, 6, 1, 12, 0, 0, tzinfo=UTC),
     paper_count=1,
 )
 DUMMY_CHAT_RESPONSE = ChatResponse(
@@ -81,10 +79,11 @@ def test_upload_valid_anthropic_key_calls_process(tmp_path):
     async def fake_process(file, rq, session_id, session_dir, api_key=""):
         return DUMMY_CARD, 5
 
-    with patch("main._process_single_file", side_effect=fake_process):
-        response = client.post(
-            "/api/upload", files=files, data=data, headers=headers
-        )
+    with (
+        patch("main._process_single_file", side_effect=fake_process),
+        patch("main.list_sessions", return_value=[]),
+    ):
+        response = client.post("/api/upload", files=files, data=data, headers=headers)
 
     assert response.status_code == 200
     body = response.json()
@@ -97,10 +96,11 @@ def test_upload_valid_openai_key_calls_process(tmp_path):
     async def fake_process(file, rq, session_id, session_dir, api_key=""):
         return DUMMY_CARD, 3
 
-    with patch("main._process_single_file", side_effect=fake_process):
-        response = client.post(
-            "/api/upload", files=files, data=data, headers=headers
-        )
+    with (
+        patch("main._process_single_file", side_effect=fake_process),
+        patch("main.list_sessions", return_value=[]),
+    ):
+        response = client.post("/api/upload", files=files, data=data, headers=headers)
 
     assert response.status_code == 200
 
@@ -197,14 +197,14 @@ def test_chat_stream_valid_key_returns_sse():
 
 def test_get_sessions_empty_list():
     with patch("main.list_sessions", return_value=[]):
-        response = client.get("/api/sessions")
+        response = client.get("/api/sessions", headers={"X-LLM-Key": VALID_ANT_KEY})
     assert response.status_code == 200
     assert response.json() == []
 
 
 def test_get_sessions_returns_sessions():
     with patch("main.list_sessions", return_value=[DUMMY_META]):
-        response = client.get("/api/sessions")
+        response = client.get("/api/sessions", headers={"X-LLM-Key": VALID_ANT_KEY})
     assert response.status_code == 200
     body = response.json()
     assert len(body) == 1
@@ -250,10 +250,12 @@ def test_patch_session_updates_question():
         research_question="Updated question",
         created_at=DUMMY_META.created_at,
         paper_count=1,
-        updated_at=datetime(2024, 6, 2, 12, 0, 0, tzinfo=timezone.utc),
+        updated_at=datetime(2024, 6, 2, 12, 0, 0, tzinfo=UTC),
     )
-    with patch("main.load_meta", return_value=DUMMY_META), \
-         patch("main.save_meta", return_value=updated_meta):
+    with (
+        patch("main.load_meta", return_value=DUMMY_META),
+        patch("main.save_meta", return_value=updated_meta),
+    ):
         response = client.patch(
             "/api/sessions/sess-123",
             json={"research_question": "Updated question"},
@@ -282,12 +284,13 @@ def test_upload_calls_save_meta(tmp_path):
     async def fake_process(file, rq, session_id, session_dir, api_key=""):
         return DUMMY_CARD, 5
 
-    with patch("main._process_single_file", side_effect=fake_process), \
-         patch("main.get_session_cards", return_value=[DUMMY_CARD]), \
-         patch("main.save_meta", return_value=DUMMY_META) as mock_save:
-        response = client.post(
-            "/api/upload", files=files, data=data, headers=headers
-        )
+    with (
+        patch("main._process_single_file", side_effect=fake_process),
+        patch("main.get_session_cards", return_value=[DUMMY_CARD]),
+        patch("main.list_sessions", return_value=[]),
+        patch("main.save_meta", return_value=DUMMY_META) as mock_save,
+    ):
+        response = client.post("/api/upload", files=files, data=data, headers=headers)
 
     assert response.status_code == 200
     mock_save.assert_called_once()

@@ -90,7 +90,7 @@ Do not fabricate content to fill sections.
 """
 
 
-def format_chunks(chunks: list[dict]) -> str:
+def format_chunks(chunks: list[dict[str, object]]) -> str:
     """Format retrieved chunks for injection into prompts.
 
     Args:

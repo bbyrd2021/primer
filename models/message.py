@@ -7,7 +7,7 @@ class ChatRequest(BaseModel):
     message: str = Field(..., min_length=1, max_length=4000)
     research_question: str = Field(..., min_length=1)
     paper_count: int = Field(..., ge=0)
-    history: list[dict] = Field(default_factory=list)
+    history: list[dict[str, str]] = Field(default_factory=list)
     generate_brief: bool = False
 
 

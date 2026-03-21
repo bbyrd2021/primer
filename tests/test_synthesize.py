@@ -1,11 +1,11 @@
 # tests/test_synthesize.py
 import json
+from unittest.mock import patch
+
 import pytest
-from unittest.mock import AsyncMock, MagicMock, patch
 
-from core.synthesize import chat, generate_brief, stream_chat, stream_brief
+from core.synthesize import chat, generate_brief, stream_brief, stream_chat
 from models.message import ChatResponse
-
 
 # ---------------------------------------------------------------------------
 # Fixtures / helpers
@@ -49,16 +49,20 @@ def test_chat_no_chunks_returns_fallback():
 
 
 def test_chat_with_chunks_calls_complete():
-    with patch("core.synthesize.retrieve", return_value=SAMPLE_CHUNKS):
-        with patch("core.synthesize.complete", return_value="Synthesized answer") as mock_complete:
-            result = chat(
-                message="Question",
-                session_id="sess",
-                research_question="rq",
-                paper_count=2,
-                history=[],
-                api_key="sk-ant-test",
-            )
+    with (
+        patch("core.synthesize.retrieve", return_value=SAMPLE_CHUNKS),
+        patch(
+            "core.synthesize.complete", return_value="Synthesized answer"
+        ) as mock_complete,
+    ):
+        result = chat(
+            message="Question",
+            session_id="sess",
+            research_question="rq",
+            paper_count=2,
+            history=[],
+            api_key="sk-ant-test",
+        )
 
     mock_complete.assert_called_once()
     call_kwargs = mock_complete.call_args[1]
@@ -90,13 +94,15 @@ def test_generate_brief_no_chunks_returns_fallback():
 def test_generate_brief_with_chunks_calls_complete_with_brief_max_tokens():
     from core.llm import BRIEF_MAX_TOKENS
 
-    with patch("core.synthesize.retrieve", return_value=SAMPLE_CHUNKS):
-        with patch("core.synthesize.complete", return_value="Brief text") as mock_complete:
-            result = generate_brief(
-                research_question="rq",
-                session_id="sess",
-                api_key="sk-ant-test",
-            )
+    with (
+        patch("core.synthesize.retrieve", return_value=SAMPLE_CHUNKS),
+        patch("core.synthesize.complete", return_value="Brief text") as mock_complete,
+    ):
+        result = generate_brief(
+            research_question="rq",
+            session_id="sess",
+            api_key="sk-ant-test",
+        )
 
     mock_complete.assert_called_once()
     call_kwargs = mock_complete.call_args[1]
@@ -142,18 +148,20 @@ async def test_stream_chat_with_chunks():
         for t in stream_texts:
             yield t
 
-    with patch("core.synthesize.retrieve", return_value=SAMPLE_CHUNKS):
-        with patch("core.synthesize.stream_complete", side_effect=fake_stream_complete):
-            events = await _collect_sse(
-                stream_chat(
-                    message="q",
-                    session_id="sess",
-                    research_question="rq",
-                    paper_count=2,
-                    history=[],
-                    api_key="sk-ant-test",
-                )
+    with (
+        patch("core.synthesize.retrieve", return_value=SAMPLE_CHUNKS),
+        patch("core.synthesize.stream_complete", side_effect=fake_stream_complete),
+    ):
+        events = await _collect_sse(
+            stream_chat(
+                message="q",
+                session_id="sess",
+                research_question="rq",
+                paper_count=2,
+                history=[],
+                api_key="sk-ant-test",
             )
+        )
 
     chunk_events = [e for e in events if e["type"] == "chunk"]
     assert [e["text"] for e in chunk_events] == stream_texts
@@ -194,15 +202,17 @@ async def test_stream_brief_with_chunks():
         for t in stream_texts:
             yield t
 
-    with patch("core.synthesize.retrieve", return_value=SAMPLE_CHUNKS):
-        with patch("core.synthesize.stream_complete", side_effect=fake_stream_complete):
-            events = await _collect_sse(
-                stream_brief(
-                    research_question="rq",
-                    session_id="sess",
-                    api_key="sk-ant-test",
-                )
+    with (
+        patch("core.synthesize.retrieve", return_value=SAMPLE_CHUNKS),
+        patch("core.synthesize.stream_complete", side_effect=fake_stream_complete),
+    ):
+        events = await _collect_sse(
+            stream_brief(
+                research_question="rq",
+                session_id="sess",
+                api_key="sk-ant-test",
             )
+        )
 
     chunk_events = [e for e in events if e["type"] == "chunk"]
     assert [e["text"] for e in chunk_events] == stream_texts

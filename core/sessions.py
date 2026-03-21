@@ -2,7 +2,7 @@
 import logging
 import os
 import shutil
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from pathlib import Path
 
 from models.paper import SessionMeta
@@ -21,7 +21,7 @@ def save_meta(
     user_id: str | None = None,
 ) -> SessionMeta:
     """Write or overwrite meta.json. Pass created_at to preserve it on update."""
-    now = datetime.now(timezone.utc)
+    now = datetime.now(UTC)
     meta = SessionMeta(
         session_id=session_id,
         research_question=research_question,

@@ -2,12 +2,15 @@
 import json
 from unittest.mock import patch
 
-import pytest
-
-from core.extract import _truncate_paper_text, extract_paper_card, get_session_cards, _api_error_message
-from core.extract import FRONT_CHARS, BACK_CHARS, MAX_PAPER_TEXT_CHARS
+from core.extract import (
+    BACK_CHARS,
+    FRONT_CHARS,
+    MAX_PAPER_TEXT_CHARS,
+    _truncate_paper_text,
+    extract_paper_card,
+    get_session_cards,
+)
 from models.paper import PaperCard
-
 
 # ---------------------------------------------------------------------------
 # _truncate_paper_text
@@ -63,15 +66,17 @@ VALID_CARD_JSON = {
 
 
 def test_extract_paper_card_returns_valid_card(tmp_path):
-    with patch("core.extract.complete", return_value=json.dumps(VALID_CARD_JSON)):
-        with patch("core.extract.CARDS_DIR", tmp_path):
-            card = extract_paper_card(
-                paper_text="Some paper text",
-                filename="yolopx.pdf",
-                research_question="What are multi-task driving perception approaches?",
-                session_id="test-session",
-                api_key="sk-ant-test",
-            )
+    with (
+        patch("core.extract.complete", return_value=json.dumps(VALID_CARD_JSON)),
+        patch("core.extract.CARDS_DIR", tmp_path),
+    ):
+        card = extract_paper_card(
+            paper_text="Some paper text",
+            filename="yolopx.pdf",
+            research_question="What are multi-task driving perception approaches?",
+            session_id="test-session",
+            api_key="sk-ant-test",
+        )
 
     assert isinstance(card, PaperCard)
     assert card.filename == "yolopx.pdf"
@@ -86,22 +91,26 @@ def test_extract_paper_card_returns_valid_card(tmp_path):
 
 def test_extract_paper_card_strips_markdown_fences(tmp_path):
     fenced = f"```json\n{json.dumps(VALID_CARD_JSON)}\n```"
-    with patch("core.extract.complete", return_value=fenced):
-        with patch("core.extract.CARDS_DIR", tmp_path):
-            card = extract_paper_card(
-                "text", "paper.pdf", "question", "session", api_key="sk-ant-test"
-            )
+    with (
+        patch("core.extract.complete", return_value=fenced),
+        patch("core.extract.CARDS_DIR", tmp_path),
+    ):
+        card = extract_paper_card(
+            "text", "paper.pdf", "question", "session", api_key="sk-ant-test"
+        )
 
     assert card.error is False
     assert card.title == VALID_CARD_JSON["title"]
 
 
 def test_extract_paper_card_falls_back_on_invalid_json(tmp_path):
-    with patch("core.extract.complete", return_value="this is not json {"):
-        with patch("core.extract.CARDS_DIR", tmp_path):
-            card = extract_paper_card(
-                "text", "broken.pdf", "question", "session", api_key="sk-ant-test"
-            )
+    with (
+        patch("core.extract.complete", return_value="this is not json {"),
+        patch("core.extract.CARDS_DIR", tmp_path),
+    ):
+        card = extract_paper_card(
+            "text", "broken.pdf", "question", "session", api_key="sk-ant-test"
+        )
 
     assert card.error is True
     assert card.filename == "broken.pdf"
@@ -111,21 +120,25 @@ def test_extract_paper_card_falls_back_on_invalid_json(tmp_path):
 
 
 def test_extract_paper_card_falls_back_on_empty_response(tmp_path):
-    with patch("core.extract.complete", return_value=""):
-        with patch("core.extract.CARDS_DIR", tmp_path):
-            card = extract_paper_card(
-                "text", "empty.pdf", "question", "session", api_key="sk-ant-test"
-            )
+    with (
+        patch("core.extract.complete", return_value=""),
+        patch("core.extract.CARDS_DIR", tmp_path),
+    ):
+        card = extract_paper_card(
+            "text", "empty.pdf", "question", "session", api_key="sk-ant-test"
+        )
 
     assert card.error is True
 
 
 def test_extract_paper_card_persists_json_to_disk(tmp_path):
-    with patch("core.extract.complete", return_value=json.dumps(VALID_CARD_JSON)):
-        with patch("core.extract.CARDS_DIR", tmp_path):
-            extract_paper_card(
-                "text", "yolopx.pdf", "question", "test-session", api_key="sk-ant-test"
-            )
+    with (
+        patch("core.extract.complete", return_value=json.dumps(VALID_CARD_JSON)),
+        patch("core.extract.CARDS_DIR", tmp_path),
+    ):
+        extract_paper_card(
+            "text", "yolopx.pdf", "question", "test-session", api_key="sk-ant-test"
+        )
 
     card_path = tmp_path / "test-session" / "yolopx.pdf.json"
     assert card_path.exists()
@@ -139,36 +152,42 @@ def test_extract_paper_card_persists_json_to_disk(tmp_path):
 
 
 def test_extract_paper_card_catches_api_exception(tmp_path):
-    with patch("core.extract.complete", side_effect=Exception("API call failed")):
-        with patch("core.extract.CARDS_DIR", tmp_path):
-            card = extract_paper_card(
-                "text", "paper.pdf", "question", "session", api_key="sk-ant-test"
-            )
+    with (
+        patch("core.extract.complete", side_effect=Exception("API call failed")),
+        patch("core.extract.CARDS_DIR", tmp_path),
+    ):
+        card = extract_paper_card(
+            "text", "paper.pdf", "question", "session", api_key="sk-ant-test"
+        )
 
     assert card.error is True
     assert card.filename == "paper.pdf"
 
 
 def test_extract_paper_card_api_exception_persists_error_card(tmp_path):
-    with patch("core.extract.complete", side_effect=Exception("API call failed")):
-        with patch("core.extract.CARDS_DIR", tmp_path):
-            extract_paper_card(
-                "text", "paper.pdf", "question", "session", api_key="sk-ant-test"
-            )
+    with (
+        patch("core.extract.complete", side_effect=Exception("API call failed")),
+        patch("core.extract.CARDS_DIR", tmp_path),
+    ):
+        extract_paper_card(
+            "text", "paper.pdf", "question", "session", api_key="sk-ant-test"
+        )
 
     card_path = tmp_path / "session" / "paper.pdf.json"
     assert card_path.exists()
 
 
 def test_extract_paper_card_api_error_message_context_window(tmp_path):
-    with patch(
-        "core.extract.complete",
-        side_effect=Exception("prompt is too long, exceeds context window"),
+    with (
+        patch(
+            "core.extract.complete",
+            side_effect=Exception("prompt is too long, exceeds context window"),
+        ),
+        patch("core.extract.CARDS_DIR", tmp_path),
     ):
-        with patch("core.extract.CARDS_DIR", tmp_path):
-            card = extract_paper_card(
-                "text", "paper.pdf", "question", "session", api_key="sk-ant-test"
-            )
+        card = extract_paper_card(
+            "text", "paper.pdf", "question", "session", api_key="sk-ant-test"
+        )
 
     assert card.error is True
     assert "context window" in card.methodology or "too large" in card.methodology
@@ -206,7 +225,9 @@ def test_get_session_cards_skips_corrupt_files(tmp_path):
     session_dir.mkdir()
 
     # One valid card
-    good = PaperCard(filename="good.pdf", session_id="corrupt-session", relevance_score=4)
+    good = PaperCard(
+        filename="good.pdf", session_id="corrupt-session", relevance_score=4
+    )
     (session_dir / "good.pdf.json").write_text(good.model_dump_json())
 
     # One corrupt file

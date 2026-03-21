@@ -1,5 +1,6 @@
 # models/paper.py
 from datetime import datetime
+
 from pydantic import BaseModel, Field
 
 
@@ -26,8 +27,8 @@ class PaperCard(BaseModel):
     synthesis_note: str | None = None
 
     # Scoring
-    relevance_score: int | None = Field(None, ge=1, le=5)
-    tier: int | None = Field(None, ge=1, le=3)
+    relevance_score: int | None = Field(default=None, ge=1, le=5)
+    tier: int | None = Field(default=None, ge=1, le=3)
 
 
 class UploadResponse(BaseModel):

@@ -5,9 +5,10 @@ import logging
 import os
 import shutil
 import uuid
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from pathlib import Path
 
+from dotenv import load_dotenv
 from fastapi import FastAPI, File, Form, Header, HTTPException, UploadFile, status
 from fastapi.responses import HTMLResponse, StreamingResponse
 from fastapi.staticfiles import StaticFiles
@@ -18,9 +19,13 @@ from core.ingest import chunk_pages, estimate_text_density, extract_text
 from core.sessions import delete_session, list_sessions, load_meta, save_meta
 from core.synthesize import chat, generate_brief, stream_brief, stream_chat
 from models.message import ChatRequest, ChatResponse
-from models.paper import PaperCard, SessionMeta, SessionMetaPublic, UpdateSessionRequest, UploadResponse
-
-from dotenv import load_dotenv
+from models.paper import (
+    PaperCard,
+    SessionMeta,
+    SessionMetaPublic,
+    UpdateSessionRequest,
+    UploadResponse,
+)
 
 load_dotenv()
 
@@ -79,7 +84,7 @@ async def root() -> str:
 
 @app.post("/api/upload", response_model=UploadResponse)
 async def upload_papers(
-    files: list[UploadFile] = File(...),
+    files: list[UploadFile] = File(...),  # noqa: B008
     research_question: str = Form(...),
     session_id: str | None = Form(None),
     x_llm_key: str = Header(default=""),
@@ -93,7 +98,10 @@ async def upload_papers(
         if len(existing_sessions) >= 3:
             raise HTTPException(
                 status_code=409,
-                detail="Session limit reached (3 max). Delete a session to create a new one.",
+                detail=(
+                    "Session limit reached (3 max)."
+                    " Delete a session to create a new one."
+                ),
             )
         session_id = str(uuid.uuid4())
 
@@ -105,7 +113,9 @@ async def upload_papers(
         if not file.filename or not file.filename.lower().endswith(".pdf"):
             continue
         tasks.append(
-            _process_single_file(file, research_question, session_id, session_dir, x_llm_key)
+            _process_single_file(
+                file, research_question, session_id, session_dir, x_llm_key
+            )
         )
 
     results = await asyncio.gather(*tasks, return_exceptions=True)
@@ -128,7 +138,11 @@ async def upload_papers(
         research_question=research_question,
         paper_count=paper_count,
         created_at=existing_meta.created_at if existing_meta else None,
-        user_id=existing_meta.user_id if existing_meta and existing_meta.user_id else user_id,
+        user_id=(
+            existing_meta.user_id
+            if existing_meta and existing_meta.user_id
+            else user_id
+        ),
     )
 
     return UploadResponse(
@@ -214,7 +228,7 @@ async def update_session(session_id: str, body: UpdateSessionRequest) -> Session
         research_question=body.research_question,
         paper_count=existing.paper_count,
         created_at=existing.created_at,
-        updated_at=datetime.now(timezone.utc),
+        updated_at=datetime.now(UTC),
     )
 
 
