@@ -22,7 +22,9 @@ dist/
 Thumbs.db
 
 # Editor
-.vscode/
+.vscode/*
+!.vscode/settings.json
+!.vscode/extensions.json
 .idea/
 *.swp
 

@@ -1,0 +1,13 @@
+{
+  "liveServer.settings.port": 5501,
+  "[python]": {
+    "editor.defaultFormatter": "charliermarsh.ruff",
+    "editor.formatOnSave": true,
+    "editor.codeActionsOnSave": {
+      "source.fixAll.ruff": "explicit",
+      "source.organizeImports.ruff": "explicit"
+    }
+  },
+  "mypy-type-checker.args": ["--strict"],
+  "ruff.lint.run": "onSave"
+}
